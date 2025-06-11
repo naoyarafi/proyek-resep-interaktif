@@ -1,0 +1,40 @@
+[1mdiff --git a/src/app/reset-password/page.tsx b/src/app/reset-password/page.tsx[m
+[1mindex b0f9f56..2502e14 100644[m
+[1m--- a/src/app/reset-password/page.tsx[m
+[1m+++ b/src/app/reset-password/page.tsx[m
+[36m@@ -1,6 +1,5 @@[m
+ 'use client';[m
+ [m
+[31m-export const dynamic = 'force-dynamic';[m
+ import { useForm, SubmitHandler } from 'react-hook-form';[m
+ import { zodResolver } from '@hookform/resolvers/zod';[m
+ import { resetPasswordSchema, ResetPasswordSchema } from '@/lib/validationSchemas';[m
+[36m@@ -8,6 +7,8 @@[m [mimport { useSearchParams, useRouter } from 'next/navigation';[m
+ import { Suspense, useState } from 'react';[m
+ import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';[m
+ [m
+[32m+[m[32mexport const dynamic = 'force-dynamic';[m
+[32m+[m
+ function ResetPasswordForm() {[m
+     const router = useRouter();[m
+     const searchParams = useSearchParams();[m
+[1mdiff --git a/src/app/verify-email/page.tsx b/src/app/verify-email/page.tsx[m
+[1mindex 0d02a6c..e9abff8 100644[m
+[1m--- a/src/app/verify-email/page.tsx[m
+[1m+++ b/src/app/verify-email/page.tsx[m
+[36m@@ -1,6 +1,6 @@[m
+ 'use client';[m
+ [m
+[31m-export const dynamic = 'force-dynamic';[m
+[32m+[m
+ import { useForm, SubmitHandler } from 'react-hook-form';[m
+ import { zodResolver } from '@hookform/resolvers/zod';[m
+ import { verifySchema, VerifySchema } from '@/lib/validationSchemas';[m
+[36m@@ -8,6 +8,7 @@[m [mimport { useSearchParams, useRouter } from 'next/navigation';[m
+ import { Suspense, useState } from 'react'; // Impor Suspense[m
+ import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';[m
+ [m
+[32m+[m[32mexport const dynamic = 'force-dynamic';[m
+ [m
+ // Komponen ini berisi logika yang menggunakan useSearchParams[m
+ function VerifyEmailForm() {[m
