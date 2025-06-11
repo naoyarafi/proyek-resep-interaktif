@@ -1,16 +1,25 @@
-// src/app/layout.tsx
-
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import { Suspense } from "react"; // <-- 1. Impor Suspense
+import { Box, CircularProgress } from "@mui/material"; // Impor komponen untuk UI loading
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Website Resep Interaktif",
-  description: "Dibuat dengan Next.js Oleh Naoya Rafi",
+  description: "Dibuat dengan Next.js dan Gemini",
 };
+
+// Komponen untuk fallback UI saat Suspense menunggu
+function LoadingFallback() {
+    return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+            <CircularProgress />
+        </Box>
+    );
+}
 
 export default function RootLayout({
   children,
@@ -20,8 +29,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar /> {/* <-- 2. Letakkan Navbar di sini */}
-        <main>{children}</main> {/* Membungkus children dengan <main> adalah praktik yang baik */}
+        {/* Navbar tetap di luar Suspense agar selalu tampil */}
+        <Navbar />
+        <main>
+          {/* ===== BUNGKUS {children} DENGAN SUSPENSE ===== */}
+          <Suspense fallback={<LoadingFallback />}>
+            {children}
+          </Suspense>
+        </main>
       </body>
     </html>
   );
