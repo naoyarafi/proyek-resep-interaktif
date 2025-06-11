@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
@@ -6,6 +7,7 @@ import { verifySchema, VerifySchema } from '@/lib/validationSchemas';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Suspense, useState } from 'react'; // Impor Suspense
 import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
+
 
 // Komponen ini berisi logika yang menggunakan useSearchParams
 function VerifyEmailForm() {

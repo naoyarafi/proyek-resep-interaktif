@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 'use client';
 
 import { useForm, SubmitHandler } from 'react-hook-form';
