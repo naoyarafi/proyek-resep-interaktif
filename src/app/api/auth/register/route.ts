@@ -44,7 +44,7 @@ export async function POST(request: Request) {
         password: hashedPassword,
         address,
         dateOfBirth,
-        role: userRole, // <-- DITAMBAHKAN KEMBALI
+        role: userRole,
         verifyCode,
         verifyCodeExpiry: expiryDate,
       });
