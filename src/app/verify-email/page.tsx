@@ -1,20 +1,18 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
+import { Suspense, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { verifySchema, VerifySchema } from '@/lib/validationSchemas';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense, useState } from 'react'; // Impor Suspense
 import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
 
+export const dynamic = 'force-dynamic';
 
-// Komponen ini berisi logika yang menggunakan useSearchParams
 function VerifyEmailForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
-
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
 
@@ -62,7 +60,6 @@ function VerifyEmailForm() {
     );
 }
 
-// Komponen utama sekarang hanya bertugas sebagai wrapper Suspense
 export default function VerifyEmailPage() {
     return (
         <Container component="main" maxWidth="xs">

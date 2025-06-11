@@ -1,12 +1,13 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
+import { Suspense, useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { resetPasswordSchema, ResetPasswordSchema } from '@/lib/validationSchemas';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { Suspense, useState } from 'react';
 import { Container, Box, Typography, TextField, Button, Alert, CircularProgress } from '@mui/material';
+
+export const dynamic = 'force-dynamic';
 
 function ResetPasswordForm() {
     const router = useRouter();
