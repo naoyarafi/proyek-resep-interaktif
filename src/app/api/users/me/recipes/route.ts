@@ -4,6 +4,8 @@ import Recipe from '@/models/Recipe.model';
 import { jwtVerify } from 'jose';
 import '@/models/Category.model';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   await dbConnect();
 
