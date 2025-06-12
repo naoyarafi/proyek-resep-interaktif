@@ -1,19 +1,17 @@
 // src/app/recipes/[id]/edit/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useForm, SubmitHandler, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { recipeSchema, RecipeSchema } from '@/lib/validationSchemas';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, useParams } from 'next/navigation';
 import { ICategory } from '@/models/Category.model';
-import { IRecipe } from '@/models/Recipe.model';
 import { Container, Typography, Box, Grid, TextField, Button, IconButton, Select, MenuItem, FormControl, InputLabel, FormHelperText, CircularProgress, Alert } from '@mui/material';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
-
-export const dynamic = 'force-dynamic';
+import Image from 'next/image';
 
 export default function EditRecipePage() {
   const router = useRouter();
@@ -25,11 +23,16 @@ export default function EditRecipePage() {
   const [apiError, setApiError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  const inputFileRef = useRef<HTMLInputElement>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+
   const {
     register,
     handleSubmit,
     control,
-    reset, // Fungsi dari react-hook-form untuk mengisi form
+    reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<RecipeSchema>({
     resolver: zodResolver(recipeSchema),
@@ -38,35 +41,25 @@ export default function EditRecipePage() {
   const { fields: mainFields, append: appendMain, remove: removeMain } = useFieldArray({ control, name: "mainIngredients" });
   const { fields: compFields, append: appendComp, remove: removeComp } = useFieldArray({ control, name: "complementaryIngredients" });
 
-  // Efek untuk mengambil data resep yang akan diedit & data kategori
   useEffect(() => {
     const fetchData = async () => {
-      if (!accessToken) {
-        router.push('/login');
-        return;
-      }
+      if (!accessToken) return router.push('/login');
       try {
-        // Ambil data resep
         const recipeRes = await fetch(`/api/recipes/${recipeId}`);
-        if (!recipeRes.ok) throw new Error('Resep tidak ditemukan atau gagal dimuat');
+        if (!recipeRes.ok) throw new Error('Resep tidak ditemukan');
         const recipeData = await recipeRes.json();
 
-        // Pengecekan kepemilikan di frontend
         if (user?.id !== recipeData.data.author._id.toString()) {
-            setApiError('Anda tidak berhak mengedit resep ini.');
-            setIsLoading(false);
-            return;
+          setApiError('Anda tidak berhak mengedit resep ini.');
+          setIsLoading(false);
+          return;
         }
 
-        // Ambil data kategori
         const catRes = await fetch('/api/categories');
-        if (catRes.ok) {
-          const catData = await catRes.json();
-          setCategories(catData.data);
-        }
+        if (catRes.ok) setCategories((await catRes.json()).data);
 
-        // Isi form dengan data yang sudah ada menggunakan reset()
-        reset(recipeData.data);
+        reset(recipeData.data); // Isi form dengan data yang ada
+        setImagePreview(recipeData.data.imageUrl); // Tampilkan gambar yang sudah ada
 
       } catch (error: any) {
         setApiError(error.message);
@@ -77,7 +70,27 @@ export default function EditRecipePage() {
     fetchData();
   }, [recipeId, accessToken, reset, router, user?.id]);
 
-  // Fungsi untuk submit data yang sudah diupdate
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    setApiError(null);
+    try {
+      const response = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        body: file,
+      });
+      if (!response.ok) throw new Error('Gagal meng-upload file.');
+      const newBlob = await response.json();
+      setImagePreview(newBlob.url);
+      setValue('imageUrl', newBlob.url, { shouldValidate: true });
+    } catch (error: any) {
+      setApiError(error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const onSubmit: SubmitHandler<RecipeSchema> = async (data) => {
     setApiError(null);
     try {
@@ -88,8 +101,6 @@ export default function EditRecipePage() {
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.message || 'Gagal memperbarui resep');
-
-        // Jika berhasil, arahkan kembali ke halaman detail resep
         router.push(`/recipes/${recipeId}`);
     } catch (err: any) {
         setApiError(err.message);
@@ -99,23 +110,26 @@ export default function EditRecipePage() {
   if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
   if (apiError) return <Container><Alert severity="error" sx={{ mt: 4 }}>{apiError}</Alert></Container>;
 
-  // Tampilan form sama persis dengan halaman Add Recipe
   return (
     <Container maxWidth="md">
-        {/* ... sisa kode JSX Anda yang panjang itu tidak berubah ... */}
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Edit Resep
-        </Typography>
-
-        {/* --- Form Utama --- */}
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" component="h1" gutterBottom>Edit Resep</Typography>
+        {apiError && <Alert severity="error" sx={{ my: 2 }}>{apiError}</Alert>}
         <Grid container spacing={2}>
+          <Grid item xs={12}><TextField fullWidth label="Judul Resep" {...register('title')} error={!!errors.title} helperText={errors.title?.message} /></Grid>
           <Grid item xs={12}>
-            <TextField fullWidth label="Judul Resep" {...register('title')} error={!!errors.title} helperText={errors.title?.message} />
+            <Typography variant="subtitle1" gutterBottom>Gambar Resep</Typography>
+            <input type="file" accept="image/*" hidden ref={inputFileRef} onChange={handleFileChange} />
+            <Button variant="outlined" onClick={() => inputFileRef.current?.click()} disabled={isUploading}>{isUploading ? 'Mengunggah...' : 'Ganti Gambar'}</Button>
+            {errors.imageUrl && !imagePreview && <FormHelperText error>{errors.imageUrl.message}</FormHelperText>}
           </Grid>
-          <Grid item xs={12}>
-            <TextField fullWidth label="URL Gambar" {...register('imageUrl')} error={!!errors.imageUrl} helperText={errors.imageUrl?.message} />
-          </Grid>
+          {imagePreview && (
+            <Grid item xs={12}>
+              <Box sx={{ mt: 2, width: 200, height: 200, position: 'relative', border: '1px dashed grey', borderRadius: 2, overflow: 'hidden' }}>
+                <Image src={imagePreview} alt="Preview" fill style={{ objectFit: 'cover' }} />
+              </Box>
+            </Grid>
+          )}
           <Grid item xs={12}>
             <TextField fullWidth multiline rows={4} label="Deskripsi / Langkah-langkah" {...register('description')} error={!!errors.description} helperText={errors.description?.message} />
           </Grid>

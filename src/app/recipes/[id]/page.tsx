@@ -15,7 +15,7 @@ import Image from "next/image";
 import IngredientCalculator from "@/components/IngredientCalculator";
 import ReactionButtons from "@/components/ReactionButtons";
 import CommentsSection from "@/components/CommentsSection";
-import RecipeActionButtons from "@/components/RecipeActionButtons";
+import RecipeActionButtons from "@/components/admin/RecipeActionButtons";
 import ReportRecipeButton from "@/components/ReportRecipeButton";
 export const dynamic = 'force-dynamic';
 

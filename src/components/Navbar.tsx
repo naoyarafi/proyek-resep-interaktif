@@ -18,9 +18,9 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter, useSearchParams } from "next/navigation";
 import SearchIcon from "@mui/icons-material/Search";
 import NotificationBell from "./NotificationBell";
-import { useState } from 'react';
+import { useState } from "react";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 function SearchBar() {
   const router = useRouter();
@@ -82,11 +82,11 @@ export default function Navbar() {
   const handleLogout = async () => {
     handleClose(); // Tutup menu dulu
     try {
-      await fetch('/api/auth/logout');
+      await fetch("/api/auth/logout");
       clearAuthData();
-      router.push('/login');
+      router.push("/login");
     } catch (error) {
-      console.error('Gagal melakukan logout:', error);
+      console.error("Gagal melakukan logout:", error);
     }
   };
 
@@ -94,7 +94,7 @@ export default function Navbar() {
     <AppBar position="static">
       <Toolbar>
         <Typography variant="h6" component="div">
-          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+          <Link href="/" style={{ textDecoration: "none", color: "inherit" }}>
             Resep Interaktif
           </Link>
         </Typography>
@@ -102,31 +102,43 @@ export default function Navbar() {
         <SearchBar />
         <Box sx={{ flexGrow: 1 }} />
 
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           {user ? (
             // --- TAMPILAN JIKA USER SUDAH LOGIN (DIPERBARUI) ---
             <>
               <NotificationBell />
               <IconButton onClick={handleMenu} size="small">
-                <Avatar sx={{ width: 32, height: 32 }}>
-                  {user.name.charAt(0).toUpperCase()}
+                <Avatar
+                  sx={{ width: 32, height: 32 }}
+                  src={user.profilePictureUrl || undefined}
+                >
+                  {/* Jika tidak ada foto, tampilkan inisial */}
+                  {!user.profilePictureUrl && user.name.charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>
               <Menu
                 anchorEl={anchorEl}
-                anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 keepMounted
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
                 open={open}
                 onClose={handleClose}
               >
                 {/* Link menu akan berbeda berdasarkan role */}
-                {user.role === 'admin' && (
-                  <MenuItem component={Link} href="/admin/users" onClick={handleClose}>
+                {user.role === "admin" && (
+                  <MenuItem
+                    component={Link}
+                    href="/admin/users"
+                    onClick={handleClose}
+                  >
                     Panel Admin
                   </MenuItem>
                 )}
-                <MenuItem component={Link} href="/profile" onClick={handleClose}>
+                <MenuItem
+                  component={Link}
+                  href="/profile"
+                  onClick={handleClose}
+                >
                   Profil Saya
                 </MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>

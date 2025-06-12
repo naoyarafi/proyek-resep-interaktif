@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
 // Hapus impor IRecipe dari model
@@ -25,12 +25,15 @@ export default function ProfilePage() {
   const router = useRouter();
   const { user, accessToken, setAuthData } = useAuthStore();
 
-  // Gunakan tipe baru untuk state kita
-  const [myRecipes, setMyRecipes] = useState<RecipeForProfile[]>([]);
+  const [myRecipes, setMyRecipes] = useState<any[]>([]); // Ganti ke any untuk sementara
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState(user?.name || '');
   const [error, setError] = useState<string | null>(null);
+
+  // State dan Ref untuk upload avatar
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -81,6 +84,42 @@ export default function ProfilePage() {
     }
   };
 
+    const handleAvatarChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !accessToken) return;
+
+    setIsUploading(true);
+    setError(null);
+
+    try {
+      // 1. Upload file ke Vercel Blob via API /api/upload
+      const uploadResponse = await fetch(`/api/upload?filename=${encodeURIComponent(file.name)}`, {
+        method: 'POST',
+        body: file,
+      });
+      if (!uploadResponse.ok) throw new Error('Gagal meng-upload gambar.');
+      const newBlob = await uploadResponse.json();
+
+      // 2. Kirim URL gambar ke API untuk update profil
+      const updateResponse = await fetch('/api/users/me/avatar', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}`},
+          body: JSON.stringify({ imageUrl: newBlob.url }),
+      });
+      const result = await updateResponse.json();
+      if (!updateResponse.ok) throw new Error(result.message);
+
+      // 3. Perbarui state Zustand dengan data dan token baru
+      setAuthData({ user: result.user, accessToken: result.accessToken });
+
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+
   if (!user) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -93,9 +132,16 @@ export default function ProfilePage() {
     <Container maxWidth="lg" sx={{ my: 4 }}>
       {/* Bagian Header Profil */}
       <Paper elevation={3} sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 4, mb: 4 }}>
-        <Avatar sx={{ width: 100, height: 100, fontSize: '3rem' }}>
-          {user.name.charAt(0).toUpperCase()}
-        </Avatar>
+                <Box sx={{ position: 'relative' }}>
+            <input type="file" accept="image/*" hidden ref={avatarFileRef} onChange={handleAvatarChange} />
+            <Avatar sx={{ width: 100, height: 100, fontSize: '3rem', cursor: 'pointer' }} 
+                    src={user.profilePictureUrl || undefined}
+                    onClick={() => avatarFileRef.current?.click()}
+            >
+                {user.name.charAt(0).toUpperCase()}
+            </Avatar>
+            {isUploading && <CircularProgress size={110} sx={{ position: 'absolute', top: -5, left: -5, zIndex: 1 }} />}
+        </Box>
         <Box>
           {isEditing ? (
             <Box component="form" onSubmit={(e) => { e.preventDefault(); handleUpdateProfile(); }}>

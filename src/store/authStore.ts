@@ -7,6 +7,7 @@ interface UserProfile {
   name: string;
   email: string;
   role: 'user' | 'admin';
+  profilePictureUrl?: string;
 }
 
 interface AuthState {
