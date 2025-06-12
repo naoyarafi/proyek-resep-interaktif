@@ -4,6 +4,8 @@ import { useAuthStore } from "@/store/authStore";
 import { Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 interface ReportActionButtonsProps {
   report: {
     _id: string;

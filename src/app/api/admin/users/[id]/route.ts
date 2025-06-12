@@ -3,6 +3,7 @@ import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User.model';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
+export const dynamic = 'force-dynamic';
 
 export async function PATCH(
   request: NextRequest,

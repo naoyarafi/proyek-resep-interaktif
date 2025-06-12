@@ -9,6 +9,7 @@ import '@/models/User.model';
 import '@/models/Recipe.model';
 import Notification from '@/models/Notification.model';
 import Recipe from '@/models/Recipe.model';
+export const dynamic = 'force-dynamic';
 
 // ===== FUNGSI GET (Untuk mengambil data reaksi) =====
 export async function GET(

@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Category from '@/models/Category.model';
 import dbConnect from '@/lib/dbConnect';
 
+export const dynamic = 'force-dynamic';
+
 async function getCategories() {
   await dbConnect();
   const categories = await Category.find({}).sort({ name: 1 });

@@ -6,6 +6,8 @@ import { Button, Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { authFetch } from '@/lib/authFetch';
 
+export const dynamic = 'force-dynamic';
+
 // ... (interface PlainUser dan UserActionButtonsProps tetap sama) ...
 interface PlainUser { _id: string; isBlocked: boolean; }
 interface UserActionButtonsProps { user: PlainUser; }

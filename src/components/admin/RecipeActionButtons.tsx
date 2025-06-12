@@ -5,6 +5,8 @@ import { Button, Box } from "@mui/material";
 import { useRouter } from "next/navigation"; // Pastikan useRouter diimpor
 import { authFetch } from '@/lib/authFetch';
 
+export const dynamic = 'force-dynamic';
+
 interface RecipeActionButtonsProps {
   recipe: {
     _id: string;

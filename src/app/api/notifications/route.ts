@@ -3,6 +3,8 @@ import dbConnect from '@/lib/dbConnect';
 import Notification from '@/models/Notification.model';
 import { jwtVerify } from 'jose';
 
+export const dynamic = 'force-dynamic';
+
 // Impor model lain agar Mongoose mengenali mereka
 import '@/models/User.model';
 

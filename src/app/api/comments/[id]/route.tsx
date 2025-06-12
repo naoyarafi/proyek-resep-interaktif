@@ -4,6 +4,8 @@ import Comment from '@/models/Comment.model';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
 
+export const dynamic = 'force-dynamic';
+
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }

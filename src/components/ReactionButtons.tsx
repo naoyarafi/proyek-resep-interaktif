@@ -10,6 +10,8 @@ import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { authFetch } from '@/lib/authFetch';
 
+export const dynamic = 'force-dynamic';
+
 interface ReactionButtonsProps {
   recipeId: string;
 }

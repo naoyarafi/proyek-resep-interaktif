@@ -7,6 +7,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit'; // Impor ikon edit
 import { authFetch } from '@/lib/authFetch';
 
+export const dynamic = 'force-dynamic';
+
 // ... (Interface IComment tetap sama) ...
 interface IComment { _id: string; user: { _id: string; name: string; profilePictureUrl?: string; }; text: string; createdAt: string; }
 interface CommentsSectionProps { recipeId: string; }
@@ -21,6 +23,8 @@ export default function CommentsSection({ recipeId }: CommentsSectionProps) {
 
   // ===== STATE BARU UNTUK MODE EDIT =====
   const [editingComment, setEditingComment] = useState<{ id: string, text: string } | null>(null);
+
+  
 
   useEffect(() => {
     // ... (fetchComments tetap sama) ...

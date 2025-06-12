@@ -10,6 +10,8 @@ import '@/models/Recipe.model';
 import Notification from '@/models/Notification.model';
 import Recipe from '@/models/Recipe.model';
 
+export const dynamic = 'force-dynamic';
+
 // FUNGSI GET: Mengambil semua komentar untuk sebuah resep
 export async function GET(
   request: NextRequest,

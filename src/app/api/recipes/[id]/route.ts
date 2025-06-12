@@ -8,6 +8,8 @@ import Category from '@/models/Category.model';
 import mongoose from 'mongoose';
 import { jwtVerify } from 'jose';
 
+export const dynamic = 'force-dynamic';
+
 // Fungsi untuk menangani request GET ke /api/recipes/[id]
 export async function GET(
   request: NextRequest,

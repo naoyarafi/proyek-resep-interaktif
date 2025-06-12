@@ -4,6 +4,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import bcryptjs from 'bcryptjs';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   await dbConnect();
   try {

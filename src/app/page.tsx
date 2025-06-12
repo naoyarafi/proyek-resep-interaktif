@@ -11,6 +11,8 @@ import {
 import Link from "next/link";
 import CategorySidebar from "@/components/CategorySidebar"; // Impor komponen sidebar
 import SortFilter from "@/components/SortFilter";
+
+export const dynamic = 'force-dynamic';
 /**
  * Fungsi ini berjalan di server untuk mengambil data resep dari API kita.
  * Ia menerima searchParams untuk membangun URL query yang dinamis.

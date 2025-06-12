@@ -6,6 +6,7 @@ import { Suspense } from "react"; // <-- 1. Impor Suspense
 import { Box, CircularProgress } from "@mui/material"; // Impor komponen untuk UI loading
 
 const inter = Inter({ subsets: ["latin"] });
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: "Website Resep Interaktif",

@@ -17,6 +17,8 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import CommentIcon from "@mui/icons-material/Comment";
 import { useRouter } from "next/navigation";
 
+export const dynamic = 'force-dynamic';
+
 // Definisikan tipe notifikasi agar sesuai dengan data dari API
 interface INotification {
   _id: string;

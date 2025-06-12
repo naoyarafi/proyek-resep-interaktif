@@ -4,6 +4,8 @@
 import { FormControl, InputLabel, Select, MenuItem, SelectChangeEvent } from '@mui/material';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 
+export const dynamic = 'force-dynamic';
+
 export default function SortFilter() {
   const router = useRouter();
   const pathname = usePathname();

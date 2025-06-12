@@ -4,6 +4,8 @@ import { jwtVerify, SignJWT } from 'jose';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User.model';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: NextRequest) {
   await dbConnect();
 

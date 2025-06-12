@@ -6,6 +6,8 @@ import User from "@/models/User.model";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   await dbConnect();
 

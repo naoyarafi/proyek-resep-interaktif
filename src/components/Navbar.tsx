@@ -20,6 +20,8 @@ import SearchIcon from "@mui/icons-material/Search";
 import NotificationBell from "./NotificationBell";
 import { useState } from 'react';
 
+export const dynamic = 'force-dynamic';
+
 function SearchBar() {
   const router = useRouter();
   const searchParams = useSearchParams();

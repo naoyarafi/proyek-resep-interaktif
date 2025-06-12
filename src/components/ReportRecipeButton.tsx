@@ -6,6 +6,8 @@ import { useRouter } from 'next/navigation';
 import { Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Alert } from '@mui/material';
 import FlagIcon from '@mui/icons-material/Flag';
 
+export const dynamic = 'force-dynamic';
+
 interface ReportRecipeButtonProps {
   recipeId: string;
 }

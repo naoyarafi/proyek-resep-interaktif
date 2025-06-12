@@ -7,6 +7,8 @@ import Link from 'next/link';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 
+export const dynamic = 'force-dynamic';
+
 // Terima seluruh objek resep sebagai prop
 interface RecipeActionButtonsProps {
   recipe: {

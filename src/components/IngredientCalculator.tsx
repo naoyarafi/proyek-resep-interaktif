@@ -3,6 +3,8 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, TextField, Grid } from '@mui/material';
 
+export const dynamic = 'force-dynamic';
+
 // Definisikan tipe untuk props yang diterima
 interface IngredientCalculatorProps {
   recipe: {

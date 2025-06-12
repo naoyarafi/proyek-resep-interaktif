@@ -6,6 +6,8 @@ import mongoose from 'mongoose';
 import '@/models/User.model';
 import '@/models/Recipe.model';
 
+export const dynamic = 'force-dynamic';
+
 export async function PATCH(
   request: NextRequest,
   { params }: { params: { id: string } }

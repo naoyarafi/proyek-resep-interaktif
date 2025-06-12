@@ -9,6 +9,7 @@ import "@/models/User.model";
 import "@/models/Category.model";
 import Category from "@/models/Category.model";
 import Reaction from '@/models/Reaction.model';
+export const dynamic = 'force-dynamic';
 
 
 export async function POST(request: NextRequest) {
