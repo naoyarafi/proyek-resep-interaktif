@@ -21,13 +21,11 @@ export const dynamic = 'force-dynamic';
 
 // Fungsi untuk mengambil data satu resep
 async function getRecipeById(id: string) {
-  const apiUrl =
-    process.env.NODE_ENV === "production"
-      ? `https://YOUR_PRODUCTION_URL/api/recipes/${id}`
-      : `http://localhost:3000/api/recipes/${id}`;
-
+  // Menggunakan variabel lingkungan yang sudah kita siapkan di Vercel
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  
   try {
-    const res = await fetch(apiUrl, { cache: "no-store" });
+    const res = await fetch(`${baseUrl}/api/recipes/${id}`, { cache: 'no-store' });
     const data = await res.json();
 
     if (!res.ok || !data.success) {
