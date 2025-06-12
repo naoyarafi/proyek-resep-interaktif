@@ -17,19 +17,12 @@ export const dynamic = 'force-dynamic';
  * Fungsi ini berjalan di server untuk mengambil data resep dari API kita.
  * Ia menerima searchParams untuk membangun URL query yang dinamis.
  */
-async function getRecipes(searchParams: {
-  [key: string]: string | string[] | undefined;
-}) {
-  // URL dasar API
-  const apiUrl =
-    process.env.NODE_ENV === "production"
-      ? `https://YOUR_PRODUCTION_URL` // Ganti ini dengan URL produksi Anda nanti
-      : "http://localhost:3000";
+async function getRecipes(searchParams: { [key: string]: string | string[] | undefined }) {
+  // Saat di server (seperti Vercel), kita bisa langsung tahu URL kita sendiri.
+  const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}` || 'http://localhost:3000';
 
-  // Membuat query string (e.g., "?search=ayam&category=Makanan+Utama")
-  const query = new URLSearchParams(
-    searchParams as Record<string, string>
-  ).toString();
+  const query = new URLSearchParams(searchParams as Record<string, string>).toString();
+
 
   try {
     // Fetch data dengan cache 'no-store' untuk selalu mendapatkan data terbaru
