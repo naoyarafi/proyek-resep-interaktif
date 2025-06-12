@@ -13,6 +13,8 @@ import { Container, Typography, Box, Grid, TextField, Button, IconButton, Select
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 
+export const dynamic = 'force-dynamic';
+
 export default function EditRecipePage() {
   const router = useRouter();
   const params = useParams();

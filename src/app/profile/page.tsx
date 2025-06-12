@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Container, Typography, Box, Paper, Grid, Card, CardActionArea, CardMedia, CardContent, CircularProgress, Avatar, Button, TextField, Alert } from '@mui/material';
 import Link from 'next/link';
 import { authFetch } from '@/lib/authFetch';
+export const dynamic = 'force-dynamic';
 
 // ===== BAGIAN BARU 1: DEFINISIKAN TIPE KHUSUS UNTUK FRONTEND =====
 // Tipe ini mendeskripsikan bentuk data JSON yang kita terima dari API

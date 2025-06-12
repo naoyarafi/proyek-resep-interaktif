@@ -17,6 +17,7 @@ import ReactionButtons from "@/components/ReactionButtons";
 import CommentsSection from "@/components/CommentsSection";
 import RecipeActionButtons from "@/components/RecipeActionButtons";
 import ReportRecipeButton from "@/components/ReportRecipeButton";
+export const dynamic = 'force-dynamic';
 
 // Fungsi untuk mengambil data satu resep
 async function getRecipeById(id: string) {

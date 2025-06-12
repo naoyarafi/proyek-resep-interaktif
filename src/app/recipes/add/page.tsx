@@ -12,6 +12,8 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import Image from 'next/image';
 
+export const dynamic = 'force-dynamic';
+
 export default function AddRecipePage() {
   // ===== SEMUA HOOKS SEKARANG BERADA DI TEMPAT YANG BENAR =====
   const router = useRouter();
