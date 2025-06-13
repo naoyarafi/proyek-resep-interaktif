@@ -30,11 +30,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {/* Navbar tetap di luar Suspense agar selalu tampil */}
+      <body 
+        className={inter.className} 
+        style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          minHeight: '100vh' 
+        }}
+      >
         <Navbar />
-        <main>
-          {/* ===== BUNGKUS {children} DENGAN SUSPENSE ===== */}
+        <main style={{ flexGrow: 1 }}> {/* flexGrow: 1 akan mendorong footer ke bawah */}
           <Suspense fallback={<LoadingFallback />}>
             {children}
           </Suspense>

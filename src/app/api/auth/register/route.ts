@@ -54,7 +54,7 @@ export async function POST(request: Request) {
       existingUser.verifyCodeExpiry = expiryDate;
       existingUser.name = name;
       existingUser.address = address;
-      existingUser.dateOfBirth = dateOfBirth;
+      existingUser.dateOfBirth = new Date(dateOfBirth);
       existingUser.role = userRole;
       await existingUser.save();
     } else {
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         email: lowerCaseEmail, // Simpan email dalam format huruf kecil
         password: hashedPassword,
         address,
-        dateOfBirth,
+        dateOfBirth: new Date(dateOfBirth),
         role: userRole,
         verifyCode,
         verifyCodeExpiry: expiryDate,
