@@ -56,6 +56,9 @@ export type VerifySchema = z.infer<typeof verifySchema>;
 export const resetPasswordSchema = z.object({
     password: z.string().min(8, { message: 'Password minimal harus 8 karakter' }),
     confirmPassword: z.string(),
+    dateOfBirth: z.coerce.date({
+    errorMap: () => ({ message: 'Tanggal lahir harus diisi' }),
+  }).optional(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Password dan Konfirmasi Password tidak cocok",
     path: ["confirmPassword"],

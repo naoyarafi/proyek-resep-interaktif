@@ -2,7 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
 
-  // ===== TAMBAHKAN BLOK INI =====
   images: {
     remotePatterns: [
       {
@@ -25,9 +24,12 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'img-global.cpcdn.com',
       },
+      {
+        protocol: 'https',
+        hostname: '8aabow5s7ek7tdya.public.blob.vercel-storage.com', 
+      },
     ],
   },
-  // ===== AKHIR BLOK TAMBAHAN =====
 };
 
 module.exports = nextConfig;
