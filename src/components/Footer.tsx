@@ -1,4 +1,4 @@
-// src/components/Footer.tsx
+'use client';
 import { Box, Typography, Container } from '@mui/material';
 
 export default function Footer() {
