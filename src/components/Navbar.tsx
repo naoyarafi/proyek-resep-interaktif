@@ -1,16 +1,16 @@
 'use client';
 
 import { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, TextField, InputAdornment, IconButton, Avatar, Menu, MenuItem, useTheme, useMediaQuery, Divider } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, TextField, InputAdornment, IconButton, Avatar, Menu, MenuItem, useMediaQuery, useTheme, Divider } from '@mui/material';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import SearchIcon from '@mui/icons-material/Search';
 import NotificationBell from './NotificationBell';
-import MenuIcon from '@mui/icons-material/Menu'; // Ikon Hamburger untuk mobile
+import MenuIcon from '@mui/icons-material/Menu';
 
-// Komponen SearchBar tidak perlu diubah, biarkan seperti adanya
-function SearchBar() {
+// Komponen SearchBar dibuat lebih fleksibel, tanpa logika display
+function SearchBar({ onSearchSubmit }: { onSearchSubmit?: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -21,8 +21,12 @@ function SearchBar() {
     const searchQuery = formData.get('search') as string;
     const params = new URLSearchParams(searchParams.toString());
     params.set('search', searchQuery.trim());
+    
     // Selalu arahkan ke halaman utama untuk pencarian
     router.push(`/?${params.toString()}`);
+
+    // Tutup menu mobile setelah search (jika fungsi ini diberikan)
+    onSearchSubmit?.();
   };
 
   // Hanya tampilkan search bar di halaman utama
@@ -31,8 +35,9 @@ function SearchBar() {
   }
 
   return (
-    <Box component="form" onSubmit={handleSearch} sx={{ display: { xs: 'none', md: 'flex' },  ml: 2, mr: 2 }}>
+    <Box component="form" onSubmit={handleSearch} sx={{ width: '100%' }}>
       <TextField
+        fullWidth
         size="small"
         variant="outlined"
         name="search"
@@ -41,11 +46,14 @@ function SearchBar() {
         sx={{
           '& .MuiOutlinedInput-root': { bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1 },
           '& .MuiOutlinedInput-input': { color: 'white' },
+          '& .MuiOutlinedInput-notchedOutline': { borderColor: 'rgba(255, 255, 255, 0.25)' },
         }}
         InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon sx={{ color: 'white' }} />
+          endAdornment: (
+            <InputAdornment position="end">
+              <IconButton type="submit" size="small" edge="end">
+                <SearchIcon sx={{ color: 'white' }} />
+              </IconButton>
             </InputAdornment>
           ),
         }}
@@ -54,12 +62,11 @@ function SearchBar() {
   );
 }
 
-
 export default function Navbar() {
   const { user, clearAuthData } = useAuthStore();
   const router = useRouter();
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm')); // Cek jika layar kecil
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
@@ -83,10 +90,9 @@ export default function Navbar() {
       console.error('Gagal melakukan logout:', error);
     }
   };
-
-  // Handler untuk tombol "Tambah Resep"
+  
   const handleAddRecipeClick = () => {
-    handleMobileMenuClose(); // Tutup menu mobile jika terbuka
+    handleMobileMenuClose();
     if (user) {
       router.push('/recipes/add');
     } else {
@@ -94,47 +100,37 @@ export default function Navbar() {
     }
   };
 
-  // Menu untuk tampilan mobile (di dalam ikon hamburger)
   const renderMobileMenu = (
-  <Menu
-    anchorEl={mobileMoreAnchorEl}
-    open={isMobileMenuOpen}
-    onClose={handleMobileMenuClose}
-    // Tambahkan style ini agar menu tidak terlalu jauh dari ikon
-    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-  >
-    {/* ===== BAGIAN BARU DIMULAI DI SINI ===== */}
-    <MenuItem sx={{
-      // Nonaktifkan efek hover karena ini adalah container untuk search bar
-      '&:hover': { backgroundColor: 'transparent' },
-      // Atur ulang padding
-      p: 1
-    }}>
-      <SearchBar />
-    </MenuItem>
-    <Divider />
-    {/* ===== AKHIR BAGIAN BARU ===== */}
+    <Menu
+      anchorEl={mobileMoreAnchorEl}
+      open={isMobileMenuOpen}
+      onClose={handleMobileMenuClose}
+      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+      sx={{ mt: '45px' }}
+    >
+      <MenuItem sx={{ '&:hover': { backgroundColor: 'transparent' }, width: '80vw', maxWidth: '300px' }}>
+        <SearchBar onSearchSubmit={handleMobileMenuClose} />
+      </MenuItem>
+      <Divider />
+      {user ? (
+        <div>
+          <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
+          <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
+          {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </div>
+      ) : (
+        <div>
+          <MenuItem onClick={() => { router.push('/login'); handleMobileMenuClose(); }}>Login</MenuItem>
+          <MenuItem onClick={() => { router.push('/register'); handleMobileMenuClose(); }}>Register</MenuItem>
+        </div>
+      )}
+    </Menu>
+  );
 
-    {user ? (
-      <div>
-        <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
-        <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
-        {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-      </div>
-    ) : (
-      <div>
-        <MenuItem onClick={() => { router.push('/login'); handleMobileMenuClose(); }}>Login</MenuItem>
-        <MenuItem onClick={() => { router.push('/register'); handleMobileMenuClose(); }}>Register</MenuItem>
-      </div>
-    )}
-  </Menu>
-);
-
-  // Menu untuk tampilan desktop (di bawah ikon avatar)
   const renderDesktopMenu = (
-     <Menu anchorEl={anchorEl} open={isMenuOpen} onClose={handleMenuClose} >
+     <Menu anchorEl={anchorEl} open={isMenuOpen} onClose={handleMenuClose} sx={{ mt: '45px' }}>
         {user?.role === 'admin' && <MenuItem component={Link} href="/admin/users" onClick={handleMenuClose}>Panel Admin</MenuItem>}
         <MenuItem component={Link} href="/profile" onClick={handleMenuClose}>Profil Saya</MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
@@ -144,11 +140,15 @@ export default function Navbar() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: { xs: 1, md: 0 } }}>
-          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>Resep Interaktif</Link>
+        <Typography variant="h6" component="div" sx={{ flexGrow: { xs: 1, md: 0 }, mr: 2 }}>
+          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>ResepKuy</Link>
         </Typography>
         
-        <SearchBar />
+        {/* Tampilkan SearchBar hanya di layar desktop */}
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+          <SearchBar />
+        </Box>
+
         <Box sx={{ flexGrow: 1 }} />
 
         {/* Tampilan Desktop */}
@@ -179,8 +179,8 @@ export default function Navbar() {
             </IconButton>
         </Box>
       </Toolbar>
-      {renderMobileMenu}
       {renderDesktopMenu}
+      {renderMobileMenu}
     </AppBar>
   );
 }

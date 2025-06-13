@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 
     // 4. Kirim email menggunakan Resend
     await resend.emails.send({
-        from: 'onboarding@resend.dev', // GANTI INI
+        from: 'noreply@resep-interaktif.com', // GANTI INI
         to: email,
         subject: 'Link Reset Password Akun Resep Anda',
         html: `<p>Anda meminta untuk me-reset password Anda. Silakan klik link di bawah ini untuk melanjutkan:</p><a href="${resetUrl}">Reset Password</a><p>Link ini hanya berlaku selama 1 jam.</p><p>Jika Anda tidak merasa meminta ini, abaikan email ini.</p>`

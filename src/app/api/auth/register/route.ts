@@ -74,7 +74,7 @@ export async function POST(request: Request) {
     // Kirim email verifikasi
     try {
       await resend.emails.send({
-        from: 'onboarding@resend.dev', // GANTI INI dengan domain terverifikasi Anda
+        from: 'noreply@resep-interaktif.com', // GANTI INI dengan domain terverifikasi Anda
         to: lowerCaseEmail, // Kirim ke email yang sudah di-lowercase
         subject: 'Kode Verifikasi untuk Akun Resep Anda',
         html: `<p>Gunakan kode OTP berikut untuk menyelesaikan pendaftaran: <strong>${verifyCode}</strong></p><p>Kode ini hanya berlaku selama 1 jam.</p>`

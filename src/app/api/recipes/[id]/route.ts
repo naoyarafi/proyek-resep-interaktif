@@ -7,6 +7,7 @@ import User from '@/models/User.model';
 import Category from '@/models/Category.model';
 import mongoose from 'mongoose';
 import { jwtVerify } from 'jose';
+import { del } from '@vercel/blob';
 
 export const dynamic = 'force-dynamic';
 
@@ -71,12 +72,22 @@ export async function DELETE(
       return NextResponse.json({ message: 'Anda tidak diizinkan menghapus resep ini' }, { status: 403 });
     }
 
-    // 4. Jika semua pemeriksaan lolos, hapus resep
-    await Recipe.findByIdAndDelete(recipeId);
+       // 2. Simpan URL gambar sebelum data resep dihapus
+    const imageUrlToDelete = recipe.imageUrl;
 
-    // Catatan: Di aplikasi nyata, kita juga akan menghapus semua
-    // reaksi dan komentar yang terkait dengan resep ini.
-    // Untuk sekarang, ini sudah cukup.
+    // 3. Hapus data resep dari MongoDB
+    await Recipe.findByIdAndDelete(recipeId);
+    
+    // 4. Hapus juga file gambar dari Vercel Blob
+    if (imageUrlToDelete) {
+        try {
+            await del(imageUrlToDelete);
+        } catch (blobError) {
+            console.error("Gagal menghapus file dari Vercel Blob:", blobError);
+            // Gagal menghapus file tidak boleh menggagalkan seluruh proses
+            // Cukup catat errornya saja.
+        }
+    }
 
     return NextResponse.json({ success: true, message: 'Resep berhasil dihapus' }, { status: 200 });
 
