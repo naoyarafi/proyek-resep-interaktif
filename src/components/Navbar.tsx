@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { AppBar, Toolbar, Typography, Button, Box, TextField, InputAdornment, IconButton, Avatar, Menu, MenuItem, useTheme, useMediaQuery } from '@mui/material';
+import { AppBar, Toolbar, Typography, Button, Box, TextField, InputAdornment, IconButton, Avatar, Menu, MenuItem, useTheme, useMediaQuery, Divider } from '@mui/material';
 import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
@@ -96,22 +96,41 @@ export default function Navbar() {
 
   // Menu untuk tampilan mobile (di dalam ikon hamburger)
   const renderMobileMenu = (
-    <Menu anchorEl={mobileMoreAnchorEl} open={isMobileMenuOpen} onClose={handleMobileMenuClose}>
-      {user ? (
-        <div>
-          <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
-          <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
-          {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
-          <MenuItem onClick={handleLogout}>Logout</MenuItem>
-        </div>
-      ) : (
-        <div>
-          <MenuItem onClick={() => { router.push('/login'); handleMobileMenuClose(); }}>Login</MenuItem>
-          <MenuItem onClick={() => { router.push('/register'); handleMobileMenuClose(); }}>Register</MenuItem>
-        </div>
-      )}
-    </Menu>
-  );
+  <Menu
+    anchorEl={mobileMoreAnchorEl}
+    open={isMobileMenuOpen}
+    onClose={handleMobileMenuClose}
+    // Tambahkan style ini agar menu tidak terlalu jauh dari ikon
+    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+    transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+  >
+    {/* ===== BAGIAN BARU DIMULAI DI SINI ===== */}
+    <MenuItem sx={{
+      // Nonaktifkan efek hover karena ini adalah container untuk search bar
+      '&:hover': { backgroundColor: 'transparent' },
+      // Atur ulang padding
+      p: 1
+    }}>
+      <SearchBar />
+    </MenuItem>
+    <Divider />
+    {/* ===== AKHIR BAGIAN BARU ===== */}
+
+    {user ? (
+      <div>
+        <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
+        <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
+        {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
+        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+      </div>
+    ) : (
+      <div>
+        <MenuItem onClick={() => { router.push('/login'); handleMobileMenuClose(); }}>Login</MenuItem>
+        <MenuItem onClick={() => { router.push('/register'); handleMobileMenuClose(); }}>Register</MenuItem>
+      </div>
+    )}
+  </Menu>
+);
 
   // Menu untuk tampilan desktop (di bawah ikon avatar)
   const renderDesktopMenu = (

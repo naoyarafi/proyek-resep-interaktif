@@ -14,11 +14,21 @@ import {
   Alert,
   Grid,
   Link as MuiLink,
+  InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function LoginPage() {
+  const [showPassword, setShowPassword] = useState(false);
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    event.preventDefault();
+  };
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
 
@@ -103,13 +113,28 @@ export default function LoginPage() {
             required
             fullWidth
             label="Password"
-            type="password"
             id="password"
             autoComplete="current-password"
             {...register("password")}
             error={!!errors.password}
             helperText={errors.password?.message}
             disabled={isSubmitting}
+            // Tambahkan ini untuk mengubah tipe dan menampilkan ikon
+            type={showPassword ? "text" : "password"}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button
             type="submit"

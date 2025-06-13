@@ -78,6 +78,11 @@ export async function GET(request: NextRequest) {
     const categoryQuery = url.searchParams.get('category');
     const sortByQuery = url.searchParams.get('sortBy');
 
+    // ===== BAGIAN BARU: Ambil Parameter Paginasi =====
+    const page = parseInt(url.searchParams.get('page') || '1', 10);
+    const limit = parseInt(url.searchParams.get('limit') || '6', 10); // Default 6 resep per halaman
+    const skip = (page - 1) * limit;
+
     let filter: any = {
       isSuspended: { $ne: true },
     };
@@ -89,55 +94,51 @@ export async function GET(request: NextRequest) {
     }
 
     let recipes;
+    // ===== BAGIAN BARU: Hitung total resep sebelum query utama =====
+    const totalRecipes = await Recipe.countDocuments(filter);
+    const totalPages = Math.ceil(totalRecipes / limit);
+
 
     if (sortByQuery === 'populer') {
-      // --- JIKA SORT BY 'POPULER', GUNAKAN AGGREGATION PIPELINE ---
       recipes = await Recipe.aggregate([
-        // Tahap 1: Filter resep yang relevan (tidak ditangguhkan, sesuai kategori/pencarian)
         { $match: filter },
-
-        // Tahap 2: "Join" dengan koleksi 'reactions'
-        {
-          $lookup: {
-            from: 'reactions',      // Koleksi yang akan di-join
-            localField: '_id',      // Field dari koleksi 'recipes'
-            foreignField: 'recipe', // Field dari koleksi 'reactions'
-            as: 'reactionData',     // Nama field baru untuk menyimpan hasil join
-          },
-        },
-
-        // Tahap 3: Buat field baru 'reactionCount' berisi jumlah reaksi
-        {
-          $addFields: {
-            reactionCount: { $size: '$reactionData' },
-          },
-        },
-
-        // Tahap 4: Urutkan berdasarkan jumlah reaksi (terbanyak ke terkecil)
+        { $lookup: { from: 'reactions', localField: '_id', foreignField: 'recipe', as: 'reactionData' }},
+        { $addFields: { reactionCount: { $size: '$reactionData' } }},
         { $sort: { reactionCount: -1, createdAt: -1 } },
-
-        // Tahap 5 & 6: Lakukan populate manual untuk author dan category
+        // ===== BAGIAN BARU: Tambahkan Paginasi ke Agregasi =====
+        { $skip: skip },
+        { $limit: limit },
+        // ===================================================
         { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
         { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
-
-        // Tahap 7: Rapikan hasil 'populate'
         { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
         { $unwind: { path: '$category', preserveNullAndEmptyArrays: true } },
       ]);
-
     } else {
-      // --- JIKA SORT BY BIASA, GUNAKAN CARA LAMA ---
-      let sortOptions: any = { createdAt: -1 }; // Default: terbaru
+      let sortOptions: any = { createdAt: -1 };
       if (sortByQuery === 'terlama') {
         sortOptions = { createdAt: 1 };
       }
       recipes = await Recipe.find(filter)
         .sort(sortOptions)
+        // ===== BAGIAN BARU: Tambahkan Paginasi ke Query find() =====
+        .skip(skip)
+        .limit(limit)
+        // ========================================================
         .populate('author', 'name')
         .populate('category', 'name');
     }
 
-    return NextResponse.json({ success: true, data: recipes });
+    // ===== BAGIAN BARU: Sertakan Info Paginasi dalam Respons =====
+    return NextResponse.json({ 
+      success: true, 
+      data: recipes,
+      pagination: {
+        totalRecipes,
+        totalPages,
+        currentPage: page,
+      }
+    });
 
   } catch (error: any) {
     return NextResponse.json({ message: 'Gagal mengambil resep', error: error.message }, { status: 500 });

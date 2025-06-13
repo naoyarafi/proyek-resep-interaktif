@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import CategorySidebar from "@/components/CategorySidebar"; // Impor komponen sidebar
 import SortFilter from "@/components/SortFilter";
+import PaginationControl from '@/components/PaginationControl'; 
 
 export const dynamic = 'force-dynamic';
 /**
@@ -54,7 +55,7 @@ export default async function HomePage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const recipes = await getRecipes(searchParams);
+  const { data: recipes, pagination } = await getRecipes(searchParams);
 
   return (
     <Container sx={{ mt: 4 }}>
@@ -148,6 +149,12 @@ export default async function HomePage({
               </Grid>
             )}
           </Grid>
+           <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 5 }}>
+            <PaginationControl 
+              totalPages={pagination?.totalPages || 0} 
+              currentPage={pagination?.currentPage || 1} 
+            />
+          </Box>
         </Grid>
       </Grid>
     </Container>
