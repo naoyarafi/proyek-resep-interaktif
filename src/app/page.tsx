@@ -14,58 +14,57 @@ import SortFilter from "@/components/SortFilter";
 import PaginationControl from '@/components/PaginationControl'; 
 
 export const dynamic = 'force-dynamic';
+
 /**
  * Fungsi ini berjalan di server untuk mengambil data resep dari API kita.
  * Ia menerima searchParams untuk membangun URL query yang dinamis.
  */
 async function getRecipes(searchParams: { [key: string]: string | string[] | undefined }) {
   // Saat di server (seperti Vercel), kita bisa langsung tahu URL kita sendiri.
-  const apiUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}` || 'http://localhost:3000';
-
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}` || 'http://localhost:3000';
   const query = new URLSearchParams(searchParams as Record<string, string>).toString();
-
 
   try {
     // Fetch data dengan cache 'no-store' untuk selalu mendapatkan data terbaru
-    const res = await fetch(`${apiUrl}/api/recipes?${query}`, {
+    const res = await fetch(`${baseUrl}/api/recipes?${query}`, {
       cache: "no-store",
     });
 
     if (!res.ok) {
-      // Jika respons tidak ok, lemparkan error untuk ditangkap oleh blok catch
       const errorData = await res.text();
       console.error("Gagal mengambil data resep, respons server:", errorData);
       throw new Error("Gagal mengambil data resep dari server");
     }
 
-    const data = await res.json();
-    return data.data || []; // Kembalikan array resep, atau array kosong jika tidak ada data
+    // ===== PERUBAHAN 1: KEMBALIKAN SELURUH OBJEK JSON DARI API =====
+    return await res.json(); 
+    
   } catch (error) {
     console.error("Error saat fetching resep:", error);
-    return []; // Kembalikan array kosong jika terjadi error
+    // Kembalikan struktur data default jika terjadi error
+    return { success: false, data: [], pagination: { totalPages: 0, currentPage: 1 } }; 
   }
 }
 
 /**
  * Ini adalah Server Component. Ia menerima `searchParams` dari URL secara otomatis sebagai props.
- * Contoh: Jika URL adalah /?search=soto, maka searchParams akan berisi { search: 'soto' }.
  */
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  // ===== PERUBAHAN 2: DESTRUCTURE `data` DAN `pagination` DARI HASIL FETCH =====
+  // `data` kita beri nama alias `recipes` agar sisa kode tidak perlu diubah
   const { data: recipes, pagination } = await getRecipes(searchParams);
 
   return (
     <Container sx={{ mt: 4 }}>
       <Grid container spacing={5}>
-        {/* Kolom Kiri: Sidebar Kategori */}
         <Grid item xs={12} md={3}>
           <CategorySidebar />
         </Grid>
 
-        {/* Kolom Kanan: Daftar Resep */}
         <Grid item xs={12} md={9}>
           <Box
             sx={{
@@ -91,7 +90,6 @@ export default async function HomePage({
                       flexDirection: "column",
                     }}
                   >
-                    {/* Membuat seluruh kartu bisa diklik dan mengarah ke halaman detail */}
                     <CardActionArea
                       component={Link}
                       href={`/recipes/${recipe._id}`}
@@ -108,7 +106,6 @@ export default async function HomePage({
                           variant="h5"
                           component="h2"
                           sx={{
-                            // Trik untuk membatasi judul menjadi 2 baris
                             display: "-webkit-box",
                             overflow: "hidden",
                             WebkitBoxOrient: "vertical",
@@ -138,7 +135,6 @@ export default async function HomePage({
                 </Grid>
               ))
             ) : (
-              // Tampilan jika tidak ada resep yang ditemukan
               <Grid item xs={12}>
                 <Typography
                   align="center"
@@ -149,7 +145,9 @@ export default async function HomePage({
               </Grid>
             )}
           </Grid>
-           <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 5 }}>
+
+          {/* ===== BAGIAN BARU: Tambahkan Paginasi di Sini ===== */}
+          <Box sx={{ display: 'flex', justifyContent: 'center', width: '100%', mt: 5 }}>
             <PaginationControl 
               totalPages={pagination?.totalPages || 0} 
               currentPage={pagination?.currentPage || 1} 
