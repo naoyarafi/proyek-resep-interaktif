@@ -6,10 +6,11 @@ import Link from 'next/link';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import SearchIcon from '@mui/icons-material/Search';
+import CloseIcon from '@mui/icons-material/Close'; // Impor ikon close
 import NotificationBell from './NotificationBell';
 import MenuIcon from '@mui/icons-material/Menu';
 
-// Komponen SearchBar dibuat lebih fleksibel, tanpa logika display
+// Komponen SearchBar dibuat lebih fleksibel
 function SearchBar({ onSearchSubmit }: { onSearchSubmit?: () => void }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -20,16 +21,18 @@ function SearchBar({ onSearchSubmit }: { onSearchSubmit?: () => void }) {
     const formData = new FormData(event.currentTarget);
     const searchQuery = formData.get('search') as string;
     const params = new URLSearchParams(searchParams.toString());
-    params.set('search', searchQuery.trim());
     
-    // Selalu arahkan ke halaman utama untuk pencarian
+    if (searchQuery.trim()) {
+      params.set('search', searchQuery.trim());
+    } else {
+      params.delete('search');
+    }
+    
     router.push(`/?${params.toString()}`);
-
-    // Tutup menu mobile setelah search (jika fungsi ini diberikan)
     onSearchSubmit?.();
   };
-
-  // Hanya tampilkan search bar di halaman utama
+  
+  // SearchBar hanya akan dirender jika kita berada di halaman utama
   if (pathname !== '/') {
     return null;
   }
@@ -42,6 +45,7 @@ function SearchBar({ onSearchSubmit }: { onSearchSubmit?: () => void }) {
         variant="outlined"
         name="search"
         placeholder="Cari resep..."
+        autoFocus
         defaultValue={searchParams.get('search') || ''}
         sx={{
           '& .MuiOutlinedInput-root': { bgcolor: 'rgba(255, 255, 255, 0.15)', borderRadius: 1 },
@@ -62,6 +66,7 @@ function SearchBar({ onSearchSubmit }: { onSearchSubmit?: () => void }) {
   );
 }
 
+
 export default function Navbar() {
   const { user, clearAuthData } = useAuthStore();
   const router = useRouter();
@@ -70,6 +75,7 @@ export default function Navbar() {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = useState<null | HTMLElement>(null);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false); // State untuk search mobile
 
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
@@ -109,15 +115,12 @@ export default function Navbar() {
       transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       sx={{ mt: '45px' }}
     >
-      <MenuItem sx={{ '&:hover': { backgroundColor: 'transparent' }, width: '80vw', maxWidth: '300px' }}>
-        <SearchBar onSearchSubmit={handleMobileMenuClose} />
-      </MenuItem>
-      <Divider />
       {user ? (
         <div>
           <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
           <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
           {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
+          <Divider />
           <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </div>
       ) : (
@@ -140,18 +143,31 @@ export default function Navbar() {
   return (
     <AppBar position="static">
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: { xs: 1, md: 0 }, mr: 2 }}>
-          <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>ResepKuy</Link>
-        </Typography>
+        {/* Tampilan Desktop (dan mobile default) */}
+        {!mobileSearchOpen && (
+           <Typography variant="h6" component="div" sx={{ flexGrow: { xs: 1, md: 0 }, mr: { xs: 0, md: 2} }}>
+            <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>ResepKuy</Link>
+          </Typography>
+        )}
         
-        {/* Tampilkan SearchBar hanya di layar desktop */}
-        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-          <SearchBar />
+        {/* Spacer untuk mendorong item ke kanan */}
+        {!isMobile && <Box sx={{ flexGrow: 1 }} />}
+
+        {/* Search Bar untuk Desktop */}
+        <Box sx={{ display: { xs: 'none', md: 'flex' }, width: '30%' }}>
+            <SearchBar />
         </Box>
 
+        {/* Tampilan Mobile saat Search Terbuka */}
+        {isMobile && mobileSearchOpen && (
+            <Box sx={{ width: '100%', ml: 1 }}>
+                <SearchBar onSearchSubmit={() => setMobileSearchOpen(false)} />
+            </Box>
+        )}
+        
         <Box sx={{ flexGrow: 1 }} />
 
-        {/* Tampilan Desktop */}
+        {/* Tampilan Desktop - Tombol Aksi */}
         <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 1 }}>
             {user ? (
                 <>
@@ -171,9 +187,16 @@ export default function Navbar() {
             )}
         </Box>
         
-        {/* Tampilan Mobile: Ikon Hamburger */}
-        <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
+        {/* Tampilan Mobile - Tombol Aksi */}
+        <Box sx={{ display: { xs: 'flex', md: 'none' }, alignItems: 'center' }}>
             {user && <NotificationBell />}
+
+            {!mobileSearchOpen && (
+                <IconButton color="inherit" onClick={() => setMobileSearchOpen(true)}>
+                    <SearchIcon />
+                </IconButton>
+            )}
+
             <IconButton size="large" color="inherit" onClick={handleMobileMenuOpen}>
                 <MenuIcon />
             </IconButton>

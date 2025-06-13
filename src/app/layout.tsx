@@ -9,9 +9,11 @@ import Footer from "@/components/Footer";
 const inter = Inter({ subsets: ["latin"] });
 export const dynamic = 'force-dynamic';
 
+
+
 export const metadata: Metadata = {
-  title: "Website Resep Interaktif",
-  description: "Dibuat dengan Next.js dan Gemini",
+  title: "Resep Interaktif - Temukan & Kreasikan Resep Favoritmu",
+  description: "Platform untuk mencari, menyimpan, dan berinteraksi dengan ribuan resep masakan. Ubah porsi bahan secara dinamis dan bagikan kreasimu.",
 };
 
 // Komponen untuk fallback UI saat Suspense menunggu

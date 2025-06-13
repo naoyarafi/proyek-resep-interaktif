@@ -17,6 +17,7 @@ import ReactionButtons from "@/components/ReactionButtons";
 import CommentsSection from "@/components/CommentsSection";
 import RecipeActionButtons from "@/components/RecipeActionButtons";
 import ReportRecipeButton from "@/components/ReportRecipeButton";
+import { Metadata } from "next";
 export const dynamic = 'force-dynamic';
 
 // Fungsi untuk mengambil data satu resep
@@ -35,6 +36,22 @@ async function getRecipeById(id: string) {
   } catch (error) {
     console.error(error);
     return null;
+  }
+}
+
+export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+  const recipe = await getRecipeById(params.id);
+
+  if (!recipe) {
+    return {
+      title: 'Resep Tidak Ditemukan',
+      description: 'Resep yang Anda cari tidak ada atau telah dihapus.',
+    }
+  }
+
+  return {
+    title: `${recipe.title} - Resep Interaktif`,
+    description: recipe.description.substring(0, 160), // Ambil 160 karakter pertama deskripsi
   }
 }
 
