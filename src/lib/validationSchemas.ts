@@ -10,8 +10,19 @@ export const registerSchema = z
       .min(8, { message: "Password minimal harus 8 karakter" }),
     confirmPassword: z.string(),
     // Tambahan lain jika ada, misal:
-    address: z.string().optional(), // .optional() berarti tidak wajib diisi
-    dateOfBirth: z.date().optional(),
+    address: z.string(), // .optional() berarti tidak wajib diisi
+    dateOfBirth: z.string().refine(val => {
+    // Izinkan string kosong atau undefined
+    if (!val) return true;
+    // Jika ada isinya, coba validasi
+    const date = new Date(val);
+    const today = new Date();
+    const thirteenYearsAgo = new Date();
+    thirteenYearsAgo.setFullYear(today.getFullYear() - 13);
+    return date <= thirteenYearsAgo;
+  }, {
+    message: "Anda harus berusia minimal 13 tahun untuk mendaftar."
+  }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     // .refine digunakan untuk validasi yang melibatkan lebih dari 1 field

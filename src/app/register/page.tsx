@@ -18,17 +18,19 @@ import {
 } from "@mui/material";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Visibility, VisibilityOff } from '@mui/icons-material';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function RegisterPage() {
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleClickShowConfirmPassword = () => setShowConfirmPassword((show) => !show);
-  
-  const handleMouseDownPassword = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickShowConfirmPassword = () =>
+    setShowConfirmPassword((show) => !show);
+
+  const handleMouseDownPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
     event.preventDefault();
   };
 
@@ -114,6 +116,27 @@ export default function RegisterPage() {
           />
           <TextField
             margin="normal"
+            fullWidth
+            id="address"
+            label="Alamat (Opsional)"
+            autoComplete="street-address"
+            {...register("address")}
+            error={!!errors.address}
+            helperText={errors.address?.message}
+          />
+          <TextField
+            margin="normal"
+            fullWidth
+            id="dateOfBirth"
+            label="Tanggal Lahir (Opsional)"
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            {...register("dateOfBirth")}
+            error={!!errors.dateOfBirth}
+            helperText={errors.dateOfBirth?.message}
+          />
+          <TextField
+            margin="normal"
             required
             fullWidth
             id="email"
@@ -123,13 +146,18 @@ export default function RegisterPage() {
             error={!!errors.email}
             helperText={errors.email?.message}
           />
-          
-           <TextField
-            margin="normal" required fullWidth label="Password"
-            id="password" autoComplete="new-password"
-            {...register('password')} error={!!errors.password}
+
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Password"
+            id="password"
+            autoComplete="new-password"
+            {...register("password")}
+            error={!!errors.password}
             helperText={errors.password?.message}
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -145,25 +173,30 @@ export default function RegisterPage() {
               ),
             }}
           />
-           <TextField
-            margin="normal" required fullWidth label="Konfirmasi Password"
-            id="confirmPassword" type={showConfirmPassword ? 'text' : 'password'}
-            {...register('confirmPassword')} error={!!errors.confirmPassword}
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            label="Konfirmasi Password"
+            id="confirmPassword"
+            type={showConfirmPassword ? "text" : "password"}
+            {...register("confirmPassword")}
+            error={!!errors.confirmPassword}
             helperText={errors.confirmPassword?.message}
             InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle confirm password visibility"
-                      onClick={handleClickShowConfirmPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle confirm password visibility"
+                    onClick={handleClickShowConfirmPassword}
+                    onMouseDown={handleMouseDownPassword}
+                    edge="end"
+                  >
+                    {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
           <Button
             type="submit"

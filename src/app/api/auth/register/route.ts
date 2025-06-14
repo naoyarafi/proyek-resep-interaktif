@@ -5,28 +5,22 @@ import bcryptjs from 'bcryptjs';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  console.log("--- REQUEST REGISTRASI DITERIMA ---");
   await dbConnect();
-
   try {
     const body = await request.json();
-    console.log("--- LANGKAH 1: BODY REQUEST MENTAH ---");
-    console.log(body);
-
-    const { name, password, address,  role } = body;
-
-    console.log("--- LANGKAH 2: NILAI dateOfBirth SETELAH DIAMBIL DARI BODY ---");
+    const { name, password, address, dateOfBirth, role } = body;
 
     const email = body.email;
     if (!email) {
-      return NextResponse.json({ message: 'Email dibutuhkan' }, { status: 400 });
+      return NextResponse.json({ message: "Email dibutuhkan" }, { status: 400 });
     }
     const lowerCaseEmail = email.toLowerCase();
 
     if (!name || !password) {
-      return NextResponse.json({ message: 'Nama dan password dibutuhkan' }, { status: 400 });
+      return NextResponse.json({ message: "Nama dan password dibutuhkan" }, { status: 400 });
     }
 
     const existingVerifiedUser = await User.findOne({ email: lowerCaseEmail, isVerified: true });
@@ -43,10 +37,10 @@ export async function POST(request: Request) {
 
     const userRole = role === 'admin' ? 'admin' : 'user';
 
-    
-    console.log("--- LANGKAH 3: NILAI dateOfBirth SETELAH DIKONVERSI DENGAN new Date() ---");
-    
-
+    // Logika defensif: Hanya konversi jika dateOfBirth ada dan bukan string kosong
+    const formattedDateOfBirth = dateOfBirth && String(dateOfBirth).trim() !== '' 
+        ? new Date(dateOfBirth) 
+        : undefined;
 
     if (existingUser) {
       existingUser.password = hashedPassword;
@@ -54,25 +48,21 @@ export async function POST(request: Request) {
       existingUser.verifyCodeExpiry = expiryDate;
       existingUser.name = name;
       existingUser.address = address;
+      existingUser.dateOfBirth = formattedDateOfBirth;
       existingUser.role = userRole;
-      console.log("--- LANGKAH 4A: MENCOBA UPDATE USER LAMA ---");
       await existingUser.save();
     } else {
-      const newUserPayload = {
+      await User.create({
         name,
         email: lowerCaseEmail,
         password: hashedPassword,
         address,
+        dateOfBirth: formattedDateOfBirth,
         role: userRole,
         verifyCode,
         verifyCodeExpiry: expiryDate,
-      };
-      console.log("--- LANGKAH 4B: MENCOBA MEMBUAT USER BARU ---");
-      console.log(newUserPayload);
-      await User.create(newUserPayload);
+      });
     }
-    
-    console.log("--- LANGKAH 5: PROSES SIMPAN/UPDATE KE DB BERHASIL ---");
     
     try {
       await resend.emails.send({
