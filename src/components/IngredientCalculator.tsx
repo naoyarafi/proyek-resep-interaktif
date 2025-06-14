@@ -1,9 +1,7 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Box, Typography, List, ListItem, ListItemText, TextField, Grid } from '@mui/material';
-
-export const dynamic = 'force-dynamic';
 
 // Definisikan tipe untuk props yang diterima
 interface IngredientCalculatorProps {
@@ -14,28 +12,30 @@ interface IngredientCalculatorProps {
   };
 }
 
+// ===== 1. FUNGSI HELPER BARU UNTUK FORMAT ANGKA =====
+const formatQuantity = (num: number): string => {
+  // Trik untuk menghilangkan .0 dari angka bulat (e.g., 2.0 -> 2)
+  // dan mempertahankan desimal jika ada (e.g., 1.5 -> 1.5)
+  // .toFixed(2) untuk membatasi maksimal 2 angka desimal
+  return Number(num.toFixed(2)).toString();
+};
+
 export default function IngredientCalculator({ recipe }: IngredientCalculatorProps) {
-  // State untuk menyimpan jumlah bahan utama yang diubah oleh pengguna.
-  // Inisialisasi dengan nilai default dari resep.
   const [mainQuantities, setMainQuantities] = useState(() =>
     recipe.mainIngredients.map(ing => ing.defaultQuantity)
   );
 
-  // Hitung total kuantitas default dari bahan utama (hanya dihitung sekali)
   const totalDefaultQuantity = useMemo(() =>
     recipe.mainIngredients.reduce((sum, ing) => sum + ing.defaultQuantity, 0)
   , [recipe.mainIngredients]);
 
-  // Hitung total kuantitas saat ini berdasarkan input pengguna
   const currentTotalQuantity = mainQuantities.reduce((sum, qty) => sum + Number(qty), 0);
   
-  // Hitung faktor pengali
-  // Hindari pembagian dengan nol jika tidak ada bahan utama
   const multiplier = totalDefaultQuantity > 0 ? currentTotalQuantity / totalDefaultQuantity : 1;
 
   const handleQuantityChange = (index: number, value: string) => {
     const newQuantities = [...mainQuantities];
-    newQuantities[index] = Number(value) || 0; // Ubah ke angka, default ke 0 jika tidak valid
+    newQuantities[index] = Number(value) || 0;
     setMainQuantities(newQuantities);
   };
 
@@ -57,7 +57,8 @@ export default function IngredientCalculator({ recipe }: IngredientCalculatorPro
                   size="small"
                   value={mainQuantities[index]}
                   onChange={(e) => handleQuantityChange(index, e.target.value)}
-                  inputProps={{ min: 0, step: "0.1" }} // Atur properti input
+                  // ===== 2. UBAH inputProps AGAR BISA DESIMAL =====
+                  inputProps={{ min: 0, step: "any" }} 
                 />
               </Grid>
               <Grid item xs={2}>
@@ -72,8 +73,8 @@ export default function IngredientCalculator({ recipe }: IngredientCalculatorPro
       <List dense>
         {recipe.complementaryIngredients.map((ing, index) => (
           <ListItem key={index}>
-            {/* Kalikan jumlah asli dengan faktor pengali */}
-            <ListItemText primary={`${ing.name} - ${(ing.quantityPerUnit * multiplier).toFixed(1)} ${ing.unit}`} />
+            {/* ===== 3. GUNAKAN FUNGSI formatQuantity DI SINI ===== */}
+            <ListItemText primary={`${ing.name} - ${formatQuantity(ing.quantityPerUnit * multiplier)} ${ing.unit}`} />
           </ListItem>
         ))}
       </List>
