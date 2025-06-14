@@ -118,7 +118,7 @@ export default function RegisterPage() {
             margin="normal"
             fullWidth
             id="address"
-            label="Alamat (Opsional)"
+            label="Alamat"
             autoComplete="street-address"
             {...register("address")}
             error={!!errors.address}
@@ -128,7 +128,7 @@ export default function RegisterPage() {
             margin="normal"
             fullWidth
             id="dateOfBirth"
-            label="Tanggal Lahir (Opsional)"
+            label="Tanggal Lahir"
             type="date"
             InputLabelProps={{ shrink: true }}
             {...register("dateOfBirth")}

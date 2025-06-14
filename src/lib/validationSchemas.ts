@@ -46,36 +46,24 @@ export type LoginSchema = z.infer<typeof loginSchema>;
 export const recipeSchema = z.object({
   title: z.string().min(3, { message: "Judul minimal 3 karakter" }),
   description: z.string().min(10, { message: "Deskripsi minimal 10 karakter" }),
-  imageUrl: z.string().url({ message: "URL gambar tidak valid" }),
-  category: z.string().min(1, { message: "Kategori harus dipilih" }), // Kita akan gunakan ID kategori (string)
-  mainIngredientUnit: z
-    .string()
-    .min(1, { message: "Satuan tidak boleh kosong" }),
+  imageUrl: z.string().url({ message: "URL gambar tidak valid" }).min(1, { message: "Gambar resep harus diunggah" }),
+  category: z.string().min(1, { message: "Kategori harus dipilih" }),
+  mainIngredientUnit: z.string().min(1, { message: "Satuan tidak boleh kosong" }),
 
-  mainIngredients: z
-    .array(
-      z.object({
-        name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
-        // Ganti .min(0.1) menjadi .gt(0)
-        defaultQuantity: z
-          .number({ invalid_type_error: "Jumlah harus angka" })
-          .gt(0, { message: "Jumlah harus lebih dari nol" }),
-      })
-    )
-    .min(1, { message: "Harus ada minimal 1 bahan utama" }),
+  mainIngredients: z.array(z.object({
+    name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
+    // PERBAIKAN: Memastikan validasi benar untuk angka desimal
+    defaultQuantity: z.coerce.number({ invalid_type_error: "Jumlah harus angka" })
+      .gt(0, { message: "Jumlah harus lebih dari nol" }),
+  })).min(1, { message: "Harus ada minimal 1 bahan utama" }),
 
-  complementaryIngredients: z
-    .array(
-      z.object({
-        name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
-        // Ganti .min(0.1) menjadi .gt(0)
-        quantityPerUnit: z
-          .number({ invalid_type_error: "Jumlah harus angka" })
-          .gt(0, { message: "Jumlah harus lebih dari nol" }),
-        unit: z.string().min(1, { message: "Satuan tidak boleh kosong" }),
-      })
-    )
-    .optional(),
+  complementaryIngredients: z.array(z.object({
+    name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
+    // PERBAIKAN: Memastikan validasi benar untuk angka desimal
+    quantityPerUnit: z.coerce.number({ invalid_type_error: "Jumlah harus angka" })
+      .gt(0, { message: "Jumlah harus lebih dari nol" }),
+    unit: z.string().min(1, { message: "Satuan tidak boleh kosong" }),
+  })).optional(),
 });
 
 export type RecipeSchema = z.infer<typeof recipeSchema>;
