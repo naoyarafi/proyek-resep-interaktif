@@ -79,12 +79,22 @@ export async function POST(request: Request) {
     }
     
     console.log("--- LANGKAH 5: PROSES SIMPAN/UPDATE KE DB BERHASIL ---");
-    // ... sisa kode pengiriman email
-    return NextResponse.json({ message: 'Pendaftaran berhasil. Cek email Anda untuk kode verifikasi.' }, { status: 201 });
-
+    
+    try {
+      await resend.emails.send({
+        from: 'noreply@resep-interaktif.com', // Pastikan ini domain terverifikasi Anda
+        to: lowerCaseEmail,
+        subject: 'Kode Verifikasi untuk Akun Resep Anda',
+        html: `<p>Gunakan kode OTP berikut untuk menyelesaikan pendaftaran: <strong>${verifyCode}</strong></p><p>Kode ini hanya berlaku selama 1 jam.</p>`
+      });
+      return NextResponse.json({ message: 'Pendaftaran berhasil. Cek email Anda untuk kode verifikasi.' }, { status: 201 });
+    } catch (emailError) {
+      console.error("Gagal mengirim email verifikasi:", emailError);
+      return NextResponse.json({ message: 'Gagal mengirim email verifikasi, coba lagi nanti.' }, { status: 500 });
+    }
   } catch (error: any) {
     console.error("--- ERROR DI BLOK CATCH UTAMA ---");
-    console.error(error); // Ini akan mencetak error Mongoose yang sebenarnya
+    console.error(error);
     return NextResponse.json({ message: 'Gagal mendaftarkan pengguna', error: error.message }, { status: 500 });
   }
 }
