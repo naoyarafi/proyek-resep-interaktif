@@ -11,18 +11,21 @@ export const registerSchema = z
     confirmPassword: z.string(),
     // Tambahan lain jika ada, misal:
     address: z.string(), // .optional() berarti tidak wajib diisi
-    dateOfBirth: z.string().refine(val => {
-    // Izinkan string kosong atau undefined
-    if (!val) return true;
-    // Jika ada isinya, coba validasi
-    const date = new Date(val);
-    const today = new Date();
-    const thirteenYearsAgo = new Date();
-    thirteenYearsAgo.setFullYear(today.getFullYear() - 13);
-    return date <= thirteenYearsAgo;
-  }, {
-    message: "Anda harus berusia minimal 13 tahun untuk mendaftar."
-  }),
+    dateOfBirth: z.string().refine(
+      (val) => {
+        // Izinkan string kosong atau undefined
+        if (!val) return true;
+        // Jika ada isinya, coba validasi
+        const date = new Date(val);
+        const today = new Date();
+        const thirteenYearsAgo = new Date();
+        thirteenYearsAgo.setFullYear(today.getFullYear() - 13);
+        return date <= thirteenYearsAgo;
+      },
+      {
+        message: "Anda harus berusia minimal 13 tahun untuk mendaftar.",
+      }
+    ),
   })
   .refine((data) => data.password === data.confirmPassword, {
     // .refine digunakan untuk validasi yang melibatkan lebih dari 1 field
@@ -53,9 +56,10 @@ export const recipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
+        // Ganti .min(0.1) menjadi .gt(0)
         defaultQuantity: z
           .number({ invalid_type_error: "Jumlah harus angka" })
-          .min(0.1, { message: "Jumlah tidak boleh nol" }),
+          .gt(0, { message: "Jumlah harus lebih dari nol" }),
       })
     )
     .min(1, { message: "Harus ada minimal 1 bahan utama" }),
@@ -64,9 +68,10 @@ export const recipeSchema = z.object({
     .array(
       z.object({
         name: z.string().min(1, { message: "Nama bahan tidak boleh kosong" }),
+        // Ganti .min(0.1) menjadi .gt(0)
         quantityPerUnit: z
           .number({ invalid_type_error: "Jumlah harus angka" })
-          .min(0.1, { message: "Jumlah tidak boleh nol" }),
+          .gt(0, { message: "Jumlah harus lebih dari nol" }),
         unit: z.string().min(1, { message: "Satuan tidak boleh kosong" }),
       })
     )

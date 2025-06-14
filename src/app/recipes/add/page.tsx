@@ -311,6 +311,7 @@ export default function AddRecipePage() {
                   helperText={
                     errors.mainIngredients?.[index]?.defaultQuantity?.message
                   }
+                  inputProps={{ min: 0, step: "any" }}
                 />
               </Grid>
               <Grid item xs={1}>
@@ -368,6 +369,7 @@ export default function AddRecipePage() {
                     errors.complementaryIngredients?.[index]?.quantityPerUnit
                       ?.message
                   }
+                  inputProps={{ min: 0, step: "any" }}
                 />
               </Grid>
               <Grid item xs={3}>

@@ -154,15 +154,17 @@ export default function EditRecipePage() {
           <Typography variant="h6">Bahan Utama</Typography>
           {mainFields.map((field, index) => (
             <Grid container spacing={1} key={field.id} alignItems="center" sx={{ mb: 1 }}>
-              <Grid item xs={7}>
-                <TextField fullWidth size="small" label="Nama Bahan" {...register(`mainIngredients.${index}.name`)} error={!!errors.mainIngredients?.[index]?.name} helperText={errors.mainIngredients?.[index]?.name?.message} />
-              </Grid>
+              <Grid item xs={7}><TextField fullWidth size="small" label="Nama Bahan" {...register(`mainIngredients.${index}.name`)} error={!!errors.mainIngredients?.[index]?.name} helperText={errors.mainIngredients?.[index]?.name?.message} /></Grid>
               <Grid item xs={4}>
-                <TextField fullWidth size="small" type="number" label="Jumlah" {...register(`mainIngredients.${index}.defaultQuantity`, { valueAsNumber: true })} error={!!errors.mainIngredients?.[index]?.defaultQuantity} helperText={errors.mainIngredients?.[index]?.defaultQuantity?.message} />
+                <TextField fullWidth size="small" type="number" label="Jumlah"
+                  {...register(`mainIngredients.${index}.defaultQuantity`, { valueAsNumber: true })}
+                  error={!!errors.mainIngredients?.[index]?.defaultQuantity}
+                  helperText={errors.mainIngredients?.[index]?.defaultQuantity?.message}
+                  // ===== Tambahkan inputProps di sini =====
+                  inputProps={{ min: 0, step: "any" }}
+                />
               </Grid>
-              <Grid item xs={1}>
-                {mainFields.length > 1 && <IconButton onClick={() => removeMain(index)}><RemoveCircleOutlineIcon /></IconButton>}
-              </Grid>
+              <Grid item xs={1}>{mainFields.length > 1 && <IconButton onClick={() => removeMain(index)}><RemoveCircleOutlineIcon /></IconButton>}</Grid>
             </Grid>
           ))}
           <Button startIcon={<AddCircleOutlineIcon />} onClick={() => appendMain({ name: '', defaultQuantity: 1 })}>Tambah Bahan Utama</Button>
@@ -173,18 +175,18 @@ export default function EditRecipePage() {
           <Typography variant="h6">Bahan Pelengkap</Typography>
           {compFields.map((field, index) => (
             <Grid container spacing={1} key={field.id} alignItems="center" sx={{ mb: 1 }}>
-              <Grid item xs={5}>
-                <TextField fullWidth size="small" label="Nama Bahan" {...register(`complementaryIngredients.${index}.name`)} error={!!errors.complementaryIngredients?.[index]?.name} helperText={errors.complementaryIngredients?.[index]?.name?.message} />
-              </Grid>
+              <Grid item xs={5}><TextField fullWidth size="small" label="Nama Bahan" {...register(`complementaryIngredients.${index}.name`)} error={!!errors.complementaryIngredients?.[index]?.name} helperText={errors.complementaryIngredients?.[index]?.name?.message} /></Grid>
               <Grid item xs={3}>
-                <TextField fullWidth size="small" type="number" label="Jumlah" {...register(`complementaryIngredients.${index}.quantityPerUnit`, { valueAsNumber: true })} error={!!errors.complementaryIngredients?.[index]?.quantityPerUnit} helperText={errors.complementaryIngredients?.[index]?.quantityPerUnit?.message} />
+                <TextField fullWidth size="small" type="number" label="Jumlah"
+                  {...register(`complementaryIngredients.${index}.quantityPerUnit`, { valueAsNumber: true })}
+                  error={!!errors.complementaryIngredients?.[index]?.quantityPerUnit}
+                  helperText={errors.complementaryIngredients?.[index]?.quantityPerUnit?.message}
+                  // ===== Tambahkan inputProps di sini juga =====
+                  inputProps={{ min: 0, step: "any" }}
+                />
               </Grid>
-              <Grid item xs={3}>
-                <TextField fullWidth size="small" label="Satuan" {...register(`complementaryIngredients.${index}.unit`)} error={!!errors.complementaryIngredients?.[index]?.unit} helperText={errors.complementaryIngredients?.[index]?.unit?.message} />
-              </Grid>
-              <Grid item xs={1}>
-                 <IconButton onClick={() => removeComp(index)}><RemoveCircleOutlineIcon /></IconButton>
-              </Grid>
+              <Grid item xs={3}><TextField fullWidth size="small" label="Satuan" {...register(`complementaryIngredients.${index}.unit`)} error={!!errors.complementaryIngredients?.[index]?.unit} helperText={errors.complementaryIngredients?.[index]?.unit?.message} /></Grid>
+              <Grid item xs={1}><IconButton onClick={() => removeComp(index)}><RemoveCircleOutlineIcon /></IconButton></Grid>
             </Grid>
           ))}
            <Button startIcon={<AddCircleOutlineIcon />} onClick={() => appendComp({ name: '', quantityPerUnit: 1, unit: '' })}>Tambah Bahan Pelengkap</Button>
