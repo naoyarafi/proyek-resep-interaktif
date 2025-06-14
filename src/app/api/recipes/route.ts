@@ -125,7 +125,7 @@ export async function GET(request: NextRequest) {
         .skip(skip)
         .limit(limit)
         // ========================================================
-        .populate('author', 'name')
+        .populate('author', 'name profilePictureUrl')
         .populate('category', 'name');
     }
 

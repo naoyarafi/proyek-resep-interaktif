@@ -32,6 +32,14 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!user.isVerified) {
+      // Kirim status 403 Forbidden, artinya user dikenali tapi tidak punya hak akses
+      return NextResponse.json(
+        { message: `Akun Anda belum terverifikasi. Silakan cek email Anda (${user.email}) untuk kode OTP.` },
+        { status: 403 }
+      );
+    }
+
     const isPasswordCorrect = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordCorrect) {
