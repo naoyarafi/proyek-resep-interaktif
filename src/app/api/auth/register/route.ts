@@ -15,10 +15,9 @@ export async function POST(request: Request) {
     console.log("--- LANGKAH 1: BODY REQUEST MENTAH ---");
     console.log(body);
 
-    const { name, password, address, dateOfBirth, role } = body;
+    const { name, password, address,  role } = body;
 
     console.log("--- LANGKAH 2: NILAI dateOfBirth SETELAH DIAMBIL DARI BODY ---");
-    console.log(`Nilai: ${dateOfBirth}, Tipe Data: ${typeof dateOfBirth}`);
 
     const email = body.email;
     if (!email) {
@@ -44,12 +43,9 @@ export async function POST(request: Request) {
 
     const userRole = role === 'admin' ? 'admin' : 'user';
 
-    const formattedDateOfBirth = dateOfBirth ? new Date(dateOfBirth) : undefined;
+    
     console.log("--- LANGKAH 3: NILAI dateOfBirth SETELAH DIKONVERSI DENGAN new Date() ---");
-    console.log(`Nilai: ${formattedDateOfBirth}, Tipe Data: ${typeof formattedDateOfBirth}`);
-    if (formattedDateOfBirth) {
-        console.log(`Apakah tanggalnya valid?: ${!isNaN(formattedDateOfBirth.getTime())}`);
-    }
+    
 
 
     if (existingUser) {
@@ -58,7 +54,6 @@ export async function POST(request: Request) {
       existingUser.verifyCodeExpiry = expiryDate;
       existingUser.name = name;
       existingUser.address = address;
-      existingUser.dateOfBirth = formattedDateOfBirth;
       existingUser.role = userRole;
       console.log("--- LANGKAH 4A: MENCOBA UPDATE USER LAMA ---");
       await existingUser.save();
@@ -68,7 +63,6 @@ export async function POST(request: Request) {
         email: lowerCaseEmail,
         password: hashedPassword,
         address,
-        dateOfBirth: formattedDateOfBirth,
         role: userRole,
         verifyCode,
         verifyCodeExpiry: expiryDate,

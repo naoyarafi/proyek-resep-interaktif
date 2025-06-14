@@ -123,17 +123,7 @@ export default function RegisterPage() {
             error={!!errors.email}
             helperText={errors.email?.message}
           />
-          <TextField
-            margin="normal"
-            fullWidth
-            id="dateOfBirth"
-            label="Tanggal Lahir"
-            type="date" // Ini akan memunculkan date picker
-            InputLabelProps={{ shrink: true }} // Agar label tidak tumpang tindih
-            {...register("dateOfBirth")}
-            error={!!errors.dateOfBirth}
-            helperText={errors.dateOfBirth?.message}
-          />
+          
            <TextField
             margin="normal" required fullWidth label="Password"
             id="password" autoComplete="new-password"
