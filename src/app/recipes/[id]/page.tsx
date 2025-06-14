@@ -5,30 +5,27 @@ import {
   Typography,
   Box,
   Paper,
-  List,
-  ListItem,
-  ListItemText,
   Divider,
 } from "@mui/material";
-import { notFound } from "next/navigation"; // Fungsi khusus Next.js untuk menampilkan halaman 404
+import { notFound } from "next/navigation";
 import Image from "next/image";
+import { Metadata } from "next";
+
+// Komponen-komponen Client
 import IngredientCalculator from "@/components/IngredientCalculator";
 import ReactionButtons from "@/components/ReactionButtons";
 import CommentsSection from "@/components/CommentsSection";
-import RecipeActionButtons from "@/components/RecipeActionButtons";
+import RecipeActionButtons from "@/components/RecipeActionButtons"; // Memastikan impor ke komponen yang benar
 import ReportRecipeButton from "@/components/ReportRecipeButton";
-import { Metadata } from "next";
+
 export const dynamic = 'force-dynamic';
 
-// Fungsi untuk mengambil data satu resep
 async function getRecipeById(id: string) {
-  // Menggunakan variabel lingkungan yang sudah kita siapkan di Vercel
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}` || 'http://localhost:3000';
   
   try {
     const res = await fetch(`${baseUrl}/api/recipes/${id}`, { cache: 'no-store' });
     const data = await res.json();
-
     if (!res.ok || !data.success) {
       return null;
     }
@@ -51,11 +48,10 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
 
   return {
     title: `${recipe.title} - Resep Interaktif`,
-    description: recipe.description.substring(0, 160), // Ambil 160 karakter pertama deskripsi
+    description: recipe.description.substring(0, 160),
   }
 }
 
-// Komponen halaman menerima 'params' secara otomatis dari URL
 export default async function RecipeDetailPage({
   params,
 }: {
@@ -63,63 +59,55 @@ export default async function RecipeDetailPage({
 }) {
   const recipe = await getRecipeById(params.id);
 
-  // Jika resep tidak ditemukan, tampilkan halaman 404 standar dari Next.js
   if (!recipe) {
     notFound();
   }
 
+  // Trik untuk mengirim data kompleks dari Server ke Client Component dengan aman
+  const serializableRecipe = JSON.parse(JSON.stringify(recipe));
+
   return (
     <Container maxWidth="md" sx={{ my: 4 }}>
-      <Paper elevation={3} sx={{ p: 4 }}>
+      <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 } }}>
         <Typography variant="h3" component="h1" gutterBottom>
           {recipe.title}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary" gutterBottom>
-          Oleh: {recipe.author?.name || "Anonim"} | Kategori:{" "}
-          {recipe.category?.name || "N/A"}
+          Oleh: {recipe.author?.name || "Anonim"} | Kategori: {recipe.category?.name || "N/A"}
         </Typography>
-        <Box
-          sx={{
-            display: "flex",
-            gap: 2,
-            alignItems: "center",
-            flexWrap: "wrap",
-          }}
-        >
-          <RecipeActionButtons recipe={recipe} />
+
+        <Box sx={{ display: "flex", justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', my: 2 }}>
+          {/* Tombol Aksi untuk pemilik & admin */}
+          <RecipeActionButtons recipe={serializableRecipe} />
+          {/* Tombol Lapor untuk semua user yang login */}
           <ReportRecipeButton recipeId={recipe._id.toString()} />
         </Box>
+        
+        {/* Tombol Reaksi untuk semua user yang login */}
         <ReactionButtons recipeId={recipe._id.toString()} />
 
-        <Box
-          sx={{ my: 3, position: "relative", width: "100%", height: "400px" }}
-        >
+        <Box sx={{ my: 3, position: "relative", width: "100%", height: { xs: 250, sm: 400 } }}>
           <Image
             src={recipe.imageUrl}
             alt={recipe.title}
             fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             style={{ objectFit: "cover", borderRadius: "8px" }}
             priority
           />
         </Box>
 
-        {/* Di sini nanti kita akan ganti dengan Kalkulator Bahan Interaktif */}
-        <IngredientCalculator recipe={recipe} />
+        {/* Kalkulator bahan interaktif yang sudah pintar memformat angka */}
+        <IngredientCalculator recipe={serializableRecipe} />
 
         <Divider sx={{ my: 4 }} />
 
-        <Typography variant="h5" gutterBottom>
-          Langkah-langkah
-        </Typography>
-        {/* Tampilkan deskripsi dengan mempertahankan format baris baru */}
-        <Typography
-          variant="body1"
-          component="div"
-          sx={{ whiteSpace: "pre-wrap" }}
-        >
+        <Typography variant="h5" gutterBottom>Langkah-langkah</Typography>
+        <Typography variant="body1" component="div" sx={{ whiteSpace: "pre-wrap" }}>
           {recipe.description}
         </Typography>
       </Paper>
+      
       <CommentsSection recipeId={recipe._id.toString()} />
     </Container>
   );
