@@ -142,7 +142,7 @@ export default function AddRecipePage() {
       const result = await response.json();
       if (!response.ok)
         throw new Error(result.message || "Gagal menyimpan resep");
-      router.push("/dashboard");
+      router.push("/");
     } catch (err: any) {
       setApiError(err.message);
     }
