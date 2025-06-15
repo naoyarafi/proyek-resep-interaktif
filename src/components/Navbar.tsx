@@ -135,7 +135,7 @@ export default function Navbar() {
 
   const renderDesktopMenu = (
      <Menu anchorEl={anchorEl} open={isMenuOpen} onClose={handleMenuClose} sx={{ mt: '45px' }}>
-      <MenuItem component={Link} href="/wishlist" onClick={handleMenuClose}>Resep Tersimpan</MenuItem>
+      <MenuItem component={Link} href="/wishlist" onClick={handleMenuClose}>Wishlist</MenuItem>
         {user?.role === 'admin' && <MenuItem component={Link} href="/admin/users" onClick={handleMenuClose}>Panel Admin</MenuItem>}
         <MenuItem component={Link} href="/profile" onClick={handleMenuClose}>Profil Saya</MenuItem>
         <MenuItem onClick={handleLogout}>Logout</MenuItem>

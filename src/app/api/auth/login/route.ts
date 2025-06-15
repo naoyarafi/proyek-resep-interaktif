@@ -5,6 +5,7 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User.model";
 import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 export const dynamic = 'force-dynamic';
 
@@ -54,6 +55,7 @@ export async function POST(request: Request) {
       name: user.name,
       email: user.email,
       role: user.role,
+      profilePictureUrl: user.profilePictureUrl,
     };
 
     const refreshTokenPayload = {
@@ -85,6 +87,8 @@ export async function POST(request: Request) {
       name: user.name,
       email: user.email,
       role: user.role,
+      profilePictureUrl: user.profilePictureUrl,
+      wishlist: user.wishlist.map((id: mongoose.Types.ObjectId) => id.toString()),
     };
 
     const response = NextResponse.json(
