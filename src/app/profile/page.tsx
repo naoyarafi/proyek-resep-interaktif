@@ -234,7 +234,7 @@ export default function ProfilePage() {
                 component="h1"
                 sx={{
                   // Aturan untuk layar extra small (xs) ke atas
-                  fontSize: { xs: "1.8rem", sm: "2.125rem" },
+                  fontSize: { xs: "1.0rem", sm: "2.125rem" },
                   // Memaksa teks untuk pindah baris jika terlalu panjang
                   wordBreak: "break-word",
                 }}

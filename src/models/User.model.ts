@@ -1,4 +1,5 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IRecipe } from './Recipe.model';
 
 // Interface untuk type safety
 export interface IUser extends Document {
@@ -16,6 +17,7 @@ export interface IUser extends Document {
   verifyCodeExpiry: Date; 
   passwordResetToken?: string; 
   passwordResetExpires?: Date; 
+  wishlist: mongoose.Schema.Types.ObjectId[] | IRecipe[];
 }
 
 // Schema yang mendefinisikan struktur di MongoDB
@@ -34,6 +36,7 @@ const UserSchema: Schema<IUser> = new Schema({
     verifyCodeExpiry: { type: Date },
     passwordResetToken: { type: String }, 
     passwordResetExpires: { type: Date }, 
+    wishlist: [{ type: Schema.Types.ObjectId, ref: 'Recipe' }],
 }, { timestamps: true });
 
 // Membuat dan mengekspor model.

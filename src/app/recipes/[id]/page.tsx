@@ -10,6 +10,8 @@ import {
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import { Metadata } from "next";
+import { cookies } from 'next/headers'; 
+import { jwtVerify } from 'jose';
 
 // Komponen-komponen Client
 import IngredientCalculator from "@/components/IngredientCalculator";
@@ -17,8 +19,49 @@ import ReactionButtons from "@/components/ReactionButtons";
 import CommentsSection from "@/components/CommentsSection";
 import RecipeActionButtons from "@/components/RecipeActionButtons"; // Memastikan impor ke komponen yang benar
 import ReportRecipeButton from "@/components/ReportRecipeButton";
+import WishlistButton from "@/components/WishlistButton"; // <-- Impor tombol baru kita
+import User from "@/models/User.model"; //
+import dbConnect from "@/lib/dbConnect";
+import mongoose from 'mongoose';
+
 
 export const dynamic = 'force-dynamic';
+
+type UserWithWishlist = {
+  wishlist: mongoose.Types.ObjectId[];
+}
+
+async function getUserWishlist(): Promise<string[]> {
+    await dbConnect();
+    try {
+        const tokenCookie = cookies().get('accessToken');
+        const token = tokenCookie?.value;
+        if (!token) return [];
+
+        const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!);
+        const { payload } = await jwtVerify(token, secret);
+        const userId = payload.id as string;
+
+        // ===== PERBAIKAN UTAMA ADA DI SINI =====
+        // 1. Lakukan query dengan .lean() seperti sebelumnya
+        const user = await User.findById(userId).select('wishlist').lean();
+        
+        // 2. Lakukan type assertion untuk 'meyakinkan' TypeScript
+        const userWithWishlist = user as UserWithWishlist | null;
+
+        // 3. Cek jika user atau wishlistnya tidak ada
+        if (!userWithWishlist || !userWithWishlist.wishlist) {
+            return [];
+        }
+
+        // 4. Lakukan map dengan tipe data yang eksplisit
+        return userWithWishlist.wishlist.map((id: mongoose.Types.ObjectId) => id.toString());
+
+    } catch (error) {
+        console.error("Gagal mengambil wishlist:", error);
+        return [];
+    }
+}
 
 async function getRecipeById(id: string) {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || `https://${process.env.VERCEL_URL}` || 'http://localhost:3000';
@@ -36,7 +79,11 @@ async function getRecipeById(id: string) {
   }
 }
 
+
+
 export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
+
+  
   const recipe = await getRecipeById(params.id);
 
   if (!recipe) {
@@ -65,6 +112,8 @@ export default async function RecipeDetailPage({
 
   // Trik untuk mengirim data kompleks dari Server ke Client Component dengan aman
   const serializableRecipe = JSON.parse(JSON.stringify(recipe));
+
+  
 
   return (
     <Container maxWidth="md" sx={{ my: 4 }}>
