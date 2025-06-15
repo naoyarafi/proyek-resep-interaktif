@@ -4,11 +4,23 @@ import User from '@/models/User.model';
 import { jwtVerify } from 'jose';
 import mongoose from 'mongoose';
 
+import '@/models/Recipe.model';
+
 // Handler untuk menambah/menghapus resep dari wishlist
 export async function PATCH(request: NextRequest) {
   await dbConnect();
   try {
-    const userId = (await jwtVerify(request.cookies.get('accessToken')?.value!, new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!))).payload.id as string;
+    // ===== PERBAIKAN: Baca token dari Header, bukan Cookie =====
+    const authorizationHeader = request.headers.get('authorization');
+    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
+      return NextResponse.json({ message: 'Token otorisasi tidak ada atau format salah' }, { status: 401 });
+    }
+    const token = authorizationHeader.split(' ')[1];
+    // ========================================================
+
+    const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!);
+    const { payload } = await jwtVerify(token, secret);
+    const userId = payload.id as string;
 
     const { recipeId } = await request.json();
     if (!mongoose.Types.ObjectId.isValid(recipeId)) {
@@ -18,16 +30,13 @@ export async function PATCH(request: NextRequest) {
     const user = await User.findById(userId);
     if (!user) return NextResponse.json({ message: 'User tidak ditemukan' }, { status: 404 });
 
-    // Cek apakah resep sudah ada di wishlist
     const index = user.wishlist.findIndex((id: mongoose.Types.ObjectId) => id.toString() === recipeId);
 
     let message = '';
     if (index > -1) {
-      // Jika sudah ada, hapus dari wishlist
       user.wishlist.splice(index, 1);
       message = 'Resep dihapus dari wishlist';
     } else {
-      // Jika belum ada, tambahkan ke wishlist
       user.wishlist.push(new mongoose.Types.ObjectId(recipeId));
       message = 'Resep ditambahkan ke wishlist';
     }
@@ -44,13 +53,21 @@ export async function PATCH(request: NextRequest) {
 export async function GET(request: NextRequest) {
     await dbConnect();
     try {
-        const userId = (await jwtVerify(request.cookies.get('accessToken')?.value!, new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!))).payload.id as string;
+        // ===== PERBAIKAN: Baca token dari Header, bukan Cookie =====
+        const authorizationHeader = request.headers.get('authorization');
+        if (!authorizationHeader) throw new Error("Token otorisasi tidak ada");
+        const token = authorizationHeader.split(' ')[1];
+        // ========================================================
+
+        const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!);
+        const { payload } = await jwtVerify(token, secret);
+        const userId = payload.id as string;
 
         const user = await User.findById(userId).populate({
             path: 'wishlist',
             populate: {
                 path: 'author category',
-                select: 'name'
+                select: 'name profilePictureUrl'
             }
         });
 
@@ -59,6 +76,10 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ success: true, data: user.wishlist });
 
     } catch (error: any) {
+        // Jika token tidak valid, kembalikan data kosong agar tidak error di frontend
+        if (error.code === 'ERR_JWT_EXPIRED' || error.message.includes('Token')) {
+            return NextResponse.json({ success: false, data: [] });
+        }
         return NextResponse.json({ message: 'Gagal mengambil wishlist', error: error.message }, { status: 500 });
     }
 }
