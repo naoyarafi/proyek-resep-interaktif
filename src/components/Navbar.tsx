@@ -119,7 +119,7 @@ export default function Navbar() {
         <div>
           <MenuItem onClick={handleAddRecipeClick}>Tambah Resep</MenuItem>
           <MenuItem onClick={() => { router.push('/profile'); handleMobileMenuClose(); }}>Profil Saya</MenuItem>
-          <MenuItem onClick={() => { router.push('/wishlist'); handleMobileMenuClose(); }}>Resep Tersimpan</MenuItem>
+          <MenuItem onClick={() => { router.push('/wishlist'); handleMobileMenuClose(); }}>Wishlist</MenuItem>
           {user.role === 'admin' && <MenuItem onClick={() => { router.push('/admin/users'); handleMobileMenuClose(); }}>Panel Admin</MenuItem>}
           <Divider />
           <MenuItem onClick={handleLogout}>Logout</MenuItem>

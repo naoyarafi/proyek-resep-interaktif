@@ -3,9 +3,8 @@ import { useEffect, useState } from 'react';
 import { Container, Typography, Grid, CircularProgress, Box } from '@mui/material';
 import { useAuthStore } from '@/store/authStore';
 import { useRouter } from 'next/navigation';
-import RecipeCard from '@/components/RecipeCard'; // Kita akan buat komponen ini
+import RecipeCard from '@/components/RecipeCard';
 
-// Tipe untuk resep yang dipopulate
 interface WishlistRecipe {
     _id: string;
     title: string;
@@ -43,7 +42,17 @@ export default function WishlistPage() {
         fetchWishlist();
     }, [user, accessToken, router]);
 
-    if (isLoading) return <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}><CircularProgress /></Box>;
+    // ===== BAGIAN PERBAIKAN UTAMA ADA DI SINI =====
+    // Buat array baru yang hanya berisi ID dari resep di wishlist
+    const wishlistIds = wishlist.map(recipe => recipe._id);
+
+    if (isLoading) {
+  return (
+    <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+      <CircularProgress />
+    </Box>
+  );
+}
 
     return (
         <Container sx={{ py: 4 }}>
@@ -52,11 +61,12 @@ export default function WishlistPage() {
                 {wishlist.length > 0 ? (
                     wishlist.map(recipe => (
                         <Grid item key={recipe._id} xs={12} sm={6} md={4}>
-                            <RecipeCard recipe={recipe} />
+                            {/* Kirim wishlistIds sebagai prop initialWishlist */}
+                            <RecipeCard recipe={recipe} initialWishlist={wishlistIds} />
                         </Grid>
                     ))
                 ) : (
-                    <Typography sx={{ ml: 2 }}>Anda belum menyimpan resep apapun.</Typography>
+                    <Typography sx={{ ml: 2, mt: 4 , textAlign: 'center'}}>Anda belum menyimpan resep apapun.</Typography>
                 )}
             </Grid>
         </Container>
