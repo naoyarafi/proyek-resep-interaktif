@@ -8,13 +8,20 @@ import { useRouter } from 'next/navigation';
 
 interface WishlistButtonProps {
   recipeId: string;
-  initialWishlist: string[]; // Daftar ID wishlist awal dari user
+  initialWishlist: string[];
 }
 
 export default function WishlistButton({ recipeId, initialWishlist }: WishlistButtonProps) {
   const { user, accessToken, setAuthData } = useAuthStore();
   const router = useRouter();
+
+  // State internal untuk UI yang responsif
   const [isInWishlist, setIsInWishlist] = useState(initialWishlist.includes(recipeId));
+
+  // Efek untuk sinkronisasi jika prop berubah (penting untuk navigasi)
+  useEffect(() => {
+    setIsInWishlist(initialWishlist.includes(recipeId));
+  }, [initialWishlist, recipeId]);
 
   const handleToggleWishlist = async () => {
     if (!user) {
@@ -22,8 +29,11 @@ export default function WishlistButton({ recipeId, initialWishlist }: WishlistBu
       return;
     }
 
+    // Simpan state lama untuk rollback jika gagal
+    const previousState = isInWishlist;
+
     // Optimistic UI Update
-    setIsInWishlist(!isInWishlist);
+    setIsInWishlist(!previousState);
 
     try {
       const res = await fetch('/api/users/me/wishlist', {
@@ -32,21 +42,24 @@ export default function WishlistButton({ recipeId, initialWishlist }: WishlistBu
         body: JSON.stringify({ recipeId }),
       });
 
-      if (!res.ok) {
-          // Jika gagal, kembalikan ke state semula
-          setIsInWishlist(isInWishlist);
-          throw new Error("Gagal update wishlist");
-      }
-      // Optional: update Zustand store
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Gagal update wishlist");
+
+      // SINKRONISASI PENTING: Update state global Zustand dengan data baru dari server
+      const newUserData = { ...user, wishlist: result.wishlist };
+      setAuthData({ user: newUserData, accessToken: accessToken! });
+
     } catch (error) {
       console.error(error);
+      // Rollback jika API call gagal
+      setIsInWishlist(previousState);
     }
   };
 
-  if(!user) return null; // Jangan tampilkan tombol jika tidak login
+  if (!user) return null;
 
   return (
-    <IconButton onClick={handleToggleWishlist}>
+    <IconButton onClick={handleToggleWishlist} aria-label="add to wishlist">
       {isInWishlist ? <BookmarkIcon color="primary" /> : <BookmarkBorderIcon />}
     </IconButton>
   );

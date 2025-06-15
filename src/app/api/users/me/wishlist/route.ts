@@ -1,23 +1,17 @@
+// src/app/api/users/me/wishlist/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/models/User.model';
-import { jwtVerify } from 'jose';
+import { jwtVerify, SignJWT } from 'jose';
 import mongoose from 'mongoose';
-
 import '@/models/Recipe.model';
 
-// Handler untuk menambah/menghapus resep dari wishlist
 export async function PATCH(request: NextRequest) {
   await dbConnect();
   try {
-    // ===== PERBAIKAN: Baca token dari Header, bukan Cookie =====
     const authorizationHeader = request.headers.get('authorization');
-    if (!authorizationHeader || !authorizationHeader.startsWith('Bearer ')) {
-      return NextResponse.json({ message: 'Token otorisasi tidak ada atau format salah' }, { status: 401 });
-    }
+    if (!authorizationHeader) throw new Error("Token tidak ada");
     const token = authorizationHeader.split(' ')[1];
-    // ========================================================
-
     const secret = new TextEncoder().encode(process.env.JWT_ACCESS_SECRET!);
     const { payload } = await jwtVerify(token, secret);
     const userId = payload.id as string;
@@ -31,7 +25,6 @@ export async function PATCH(request: NextRequest) {
     if (!user) return NextResponse.json({ message: 'User tidak ditemukan' }, { status: 404 });
 
     const index = user.wishlist.findIndex((id: mongoose.Types.ObjectId) => id.toString() === recipeId);
-
     let message = '';
     if (index > -1) {
       user.wishlist.splice(index, 1);
@@ -40,9 +33,29 @@ export async function PATCH(request: NextRequest) {
       user.wishlist.push(new mongoose.Types.ObjectId(recipeId));
       message = 'Resep ditambahkan ke wishlist';
     }
-
     await user.save();
-    return NextResponse.json({ success: true, message, wishlist: user.wishlist });
+
+    // ===== BAGIAN BARU: KIRIM KEMBALI DATA USER LENGKAP & TOKEN BARU =====
+    const updatedUserProfile = {
+        id: user._id.toString(),
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        profilePictureUrl: user.profilePictureUrl,
+        wishlist: user.wishlist.map((id: mongoose.Types.ObjectId) => id.toString()),
+    };
+    const newAccessToken = await new SignJWT(updatedUserProfile)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime(process.env.JWT_ACCESS_TOKEN_EXPIRATION!)
+        .sign(secret);
+
+    return NextResponse.json({ 
+        success: true, 
+        message, 
+        user: updatedUserProfile,
+        accessToken: newAccessToken
+    });
+    // =================================================================
 
   } catch (error: any) {
     return NextResponse.json({ message: 'Gagal memperbarui wishlist', error: error.message }, { status: 500 });
