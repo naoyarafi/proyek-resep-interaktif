@@ -11,6 +11,7 @@ interface WishlistRecipe {
     imageUrl: string;
     author: { _id: string, name: string };
     category: { _id: string, name: string };
+    createdAt: string;
 }
 
 export default function WishlistPage() {
