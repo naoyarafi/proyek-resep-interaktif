@@ -1,0 +1,14 @@
+naoyarafie
+LdeNgLki56bhip7E
+
+
+mongodb+srv://naoyarafie:LdeNgLki56bhip7E@proyek-resep-interaktif.z7q6ji4.mongodb.net/?retryWrites=true&w=majority&appName=proyek-resep-interaktif
+
+
+
+
+mongodb+srv://naoyarafie:LdeNgLki56bhip7E@proyek-resep-interaktif.z7q6ji4.mongodb.net/
+
+NEXT_PUBLIC_BASE_URL=https://proyek-resep-interaktif-nffo.vercel.app/
+
+
