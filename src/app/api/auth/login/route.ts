@@ -33,6 +33,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (user.isBlocked) {
+        return NextResponse.json(
+            { message: 'Akun Anda telah ditangguhkan atau diblokir oleh admin.' }, 
+            { status: 403 } // 403 Forbidden
+        );
+    }
+
     if (!user.isVerified) {
       // Kirim status 403 Forbidden, artinya user dikenali tapi tidak punya hak akses
       return NextResponse.json(
