@@ -8,9 +8,9 @@ import { cookies } from "next/headers";
 import "@/models/User.model";
 import "@/models/Category.model";
 import Category from "@/models/Category.model";
-import Reaction from '@/models/Reaction.model';
-export const dynamic = 'force-dynamic';
-
+import Reaction from "@/models/Reaction.model";
+import mongoose from "mongoose";
+export const dynamic = "force-dynamic";
 
 export async function POST(request: NextRequest) {
   await dbConnect();
@@ -74,23 +74,23 @@ export async function GET(request: NextRequest) {
 
   try {
     const url = new URL(request.url);
-    const searchQuery = url.searchParams.get('search') || '';
-    const categoryQuery = url.searchParams.get('category');
-    const sortByQuery = url.searchParams.get('sortBy');
+    const searchQuery = url.searchParams.get("search") || "";
+    const categoryQuery = url.searchParams.get("category");
+    const sortByQuery = url.searchParams.get("sortBy");
 
     // ===== BAGIAN BARU: Ambil Parameter Paginasi =====
-    const page = parseInt(url.searchParams.get('page') || '1', 10);
-    const limit = parseInt(url.searchParams.get('limit') || '6', 10); // Default 6 resep per halaman
+    const page = parseInt(url.searchParams.get("page") || "1", 10);
+    const limit = parseInt(url.searchParams.get("limit") || "6", 10); // Default 6 resep per halaman
     const skip = (page - 1) * limit;
 
     let filter: any = {
       isSuspended: { $ne: true },
     };
     if (searchQuery) {
-      filter.title = { $regex: searchQuery, $options: 'i' };
+      filter.title = { $regex: searchQuery, $options: "i" };
     }
-    if (categoryQuery) {
-      filter.category = categoryQuery;
+    if (categoryQuery && mongoose.Types.ObjectId.isValid(categoryQuery)) {
+      filter.category = new mongoose.Types.ObjectId(categoryQuery);
     }
 
     let recipes;
@@ -98,25 +98,45 @@ export async function GET(request: NextRequest) {
     const totalRecipes = await Recipe.countDocuments(filter);
     const totalPages = Math.ceil(totalRecipes / limit);
 
-
-    if (sortByQuery === 'populer') {
+    if (sortByQuery === "populer") {
       recipes = await Recipe.aggregate([
         { $match: filter },
-        { $lookup: { from: 'reactions', localField: '_id', foreignField: 'recipe', as: 'reactionData' }},
-        { $addFields: { reactionCount: { $size: '$reactionData' } }},
+        {
+          $lookup: {
+            from: "reactions",
+            localField: "_id",
+            foreignField: "recipe",
+            as: "reactionData",
+          },
+        },
+        { $addFields: { reactionCount: { $size: "$reactionData" } } },
         { $sort: { reactionCount: -1, createdAt: -1 } },
         // ===== BAGIAN BARU: Tambahkan Paginasi ke Agregasi =====
         { $skip: skip },
         { $limit: limit },
         // ===================================================
-        { $lookup: { from: 'users', localField: 'author', foreignField: '_id', as: 'author' } },
-        { $lookup: { from: 'categories', localField: 'category', foreignField: '_id', as: 'category' } },
-        { $unwind: { path: '$author', preserveNullAndEmptyArrays: true } },
-        { $unwind: { path: '$category', preserveNullAndEmptyArrays: true } },
+        {
+          $lookup: {
+            from: "users",
+            localField: "author",
+            foreignField: "_id",
+            as: "author",
+          },
+        },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "category",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        { $unwind: { path: "$author", preserveNullAndEmptyArrays: true } },
+        { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
       ]);
     } else {
       let sortOptions: any = { createdAt: -1 };
-      if (sortByQuery === 'terlama') {
+      if (sortByQuery === "terlama") {
         sortOptions = { createdAt: 1 };
       }
       recipes = await Recipe.find(filter)
@@ -125,22 +145,24 @@ export async function GET(request: NextRequest) {
         .skip(skip)
         .limit(limit)
         // ========================================================
-        .populate('author', 'name profilePictureUrl')
-        .populate('category', 'name');
+        .populate("author", "name profilePictureUrl")
+        .populate("category", "name");
     }
 
     // ===== BAGIAN BARU: Sertakan Info Paginasi dalam Respons =====
-    return NextResponse.json({ 
-      success: true, 
+    return NextResponse.json({
+      success: true,
       data: recipes,
       pagination: {
         totalRecipes,
         totalPages,
         currentPage: page,
-      }
+      },
     });
-
   } catch (error: any) {
-    return NextResponse.json({ message: 'Gagal mengambil resep', error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { message: "Gagal mengambil resep", error: error.message },
+      { status: 500 }
+    );
   }
 }
